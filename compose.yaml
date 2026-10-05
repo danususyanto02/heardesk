@@ -1,0 +1,42 @@
+services:
+  migrate:
+    build:
+      context: .
+      target: operator
+    environment:
+      MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set migration credentials in operator environment}
+    restart: "no"
+  app:
+    build:
+      context: .
+      target: runner
+    env_file: .env
+    environment:
+      STORAGE_DIR: /app/storage
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - uploads:/app/storage
+      - next-cache:/app/.next/cache
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 1g
+    cpus: 2
+    pids_limit: 128
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+volumes:
+  uploads:
+  next-cache:

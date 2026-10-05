@@ -1,0 +1,14 @@
+import { config } from "dotenv";
+import { spawnSync, spawn } from "node:child_process";
+import pg from "pg";
+import { validateTestDatabaseUrls } from "./test-config";
+config({ path: ".env.test", override: true, quiet: true });
+validateTestDatabaseUrls(process.env.DATABASE_URL, process.env.MIGRATION_DATABASE_URL);
+const migration = spawnSync(process.execPath, ["node_modules/prisma/build/index.js", "migrate", "deploy"], { env: process.env, stdio: "inherit" });
+if (migration.status !== 0) process.exit(1);
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+await pool.query('DELETE FROM "InternalNote"; DELETE FROM "Attachment"; DELETE FROM "Feedback"; DELETE FROM "Installation"; DELETE FROM "Site"; DELETE FROM "session"; DELETE FROM "account"; DELETE FROM "verification"; DELETE FROM "user"; DELETE FROM "RateBucket"; DELETE FROM "rateLimit"; DELETE FROM "UploadReservation"; DELETE FROM "StorageBudget";');
+await pool.end();
+const production = process.env.E2E_PRODUCTION === "true";
+const child = spawn(process.execPath, production ? ["--import", "tsx", "scripts/start.ts"] : ["node_modules/next/dist/bin/next", "dev", "-p", "3100"], { env: { ...process.env, PORT: "3100", HOSTNAME: "localhost" }, stdio: "inherit" });
+process.on("SIGTERM", () => child.kill()); process.on("SIGINT", () => child.kill()); child.on("exit", code => process.exit(code ?? 0));

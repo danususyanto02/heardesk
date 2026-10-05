@@ -1,0 +1,1 @@
+export function storageAdmission({ free, floor, reserved, needed, used, quota }: { free: number; floor: number; reserved: number; needed: number; used: number; quota: number }) { return free - reserved - needed >= floor && used + reserved + needed <= quota; }
