@@ -5,6 +5,7 @@ services:
       target: operator
     environment:
       MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?Set migration credentials in operator environment}
+      HEARDESK_MIGRATION_APPROVED: ${HEARDESK_MIGRATION_APPROVED:-false}
     restart: "no"
   app:
     build:

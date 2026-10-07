@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
   let ancestors = "'none'";
   if (isWidget) {
     const key = request.nextUrl.pathname.split("/")[2];
-    try { const site = await db.site.findUnique({ where: { publicKey: key } }); if (site) ancestors = `'self' ${site.origin}`; } catch { ancestors = "'none'"; }
+    try { const site = await db.site.findFirst({ where: { publicKey: key, company: { profile: { status: "ACTIVE" } } } }); if (site) ancestors = `'self' ${site.origin}`; } catch { ancestors = "'none'"; }
   }
   const dev = process.env.NODE_ENV !== "production";
   const csp = `default-src 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'${dev ? " ws: " : ""}; frame-src 'self'; frame-ancestors ${ancestors}; base-uri 'none'; object-src 'none'; form-action 'self'`;

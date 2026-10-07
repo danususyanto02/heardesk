@@ -5,7 +5,7 @@ import { Copy, Check, ArrowsClockwise, X } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { FeedbackForm } from "./feedback-form";
 
-type Site = { name: string; origin: string; buttonLabel: string; position: string; publicKey: string };
+type Site = { id: number; companyId: string; name: string; origin: string; buttonLabel: string; position: string; publicKey: string };
 type Configuration = { configured: boolean; appUrl: string } & Partial<Site>;
 
 export function Settings() {
@@ -35,7 +35,7 @@ export function Settings() {
     event.preventDefault(); if (!draft || !configuration) return;
     setBusy(true); setError(""); setNotice("");
     try {
-      const result = await api<Site>("/api/admin/site", { method: "PATCH", body: JSON.stringify(draft) });
+      const result = await api<Site>(`/api/companies/${draft.companyId}/sites/${draft.id}`, { method: "PATCH", body: JSON.stringify({ name: draft.name, origin: draft.origin, buttonLabel: draft.buttonLabel, position: draft.position }) });
       setDraft(result); setConfiguration({ ...result, configured: true, appUrl: configuration.appUrl });
       setNotice("Pengaturan tersimpan. Muat ulang website untuk melihat perubahan."); router.refresh();
     } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
@@ -48,7 +48,7 @@ export function Settings() {
     if (!configuration?.publicKey) return;
     setRotating(true); setError("");
     try {
-      const result = await api<Site>("/api/admin/site/key", { method: "POST", body: JSON.stringify({ confirm: true, expectedKey: configuration.publicKey }) });
+      const result = await api<Site>(`/api/companies/${configuration.companyId}/sites/${configuration.id}/key`, { method: "POST", body: JSON.stringify({ confirm: true, expectedKey: configuration.publicKey }) });
       setConfiguration(current => current ? { ...current, publicKey: result.publicKey } : current);
       setDraft(current => current ? { ...current, publicKey: result.publicKey } : current);
       setCopied(""); setNotice("Kode pemasangan diperbarui. Ganti kode lama pada website Anda."); confirmation.current?.close();

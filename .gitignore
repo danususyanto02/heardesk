@@ -4,6 +4,7 @@
 !.env.migration.example
 node_modules/
 .next/
+.next-heardesk/
 coverage/
 playwright-report/
 test-results/

@@ -1,9 +1,12 @@
 import { config } from "dotenv";
 import { cp, mkdir } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import path from "node:path";
 config({ quiet: true });
-await mkdir(".next/standalone/.next", { recursive: true });
-await cp(".next/static", ".next/standalone/.next/static", { recursive: true });
-await cp("public", ".next/standalone/public", { recursive: true });
-const child = spawn(process.execPath, [".next/standalone/server.js"], { stdio: "inherit", env: { ...process.env, HOSTNAME: process.env.HOSTNAME ?? "127.0.0.1", PORT: process.env.PORT ?? "3000" } });
+if (process.env.HEARDESK_EMAIL_DIR) process.env.HEARDESK_EMAIL_DIR = path.resolve(process.env.HEARDESK_EMAIL_DIR);
+const build = process.env.HEARDESK_BUILD_DIR ?? ".next";
+await mkdir(path.join(build, "standalone", build), { recursive: true });
+await cp(path.join(build, "static"), path.join(build, "standalone", build, "static"), { recursive: true });
+await cp("public", path.join(build, "standalone/public"), { recursive: true });
+const child = spawn(process.execPath, [path.join(build, "standalone/server.js")], { stdio: "inherit", env: { ...process.env, HOSTNAME: process.env.HOSTNAME ?? "127.0.0.1", PORT: process.env.PORT ?? "3000" } });
 process.on("SIGTERM", () => child.kill()); process.on("SIGINT", () => child.kill()); child.on("exit", code => process.exit(code ?? 0));

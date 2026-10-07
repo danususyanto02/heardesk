@@ -14,6 +14,8 @@
     "start": "tsx scripts/start.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:integration": "tsx scripts/test-integration.ts",
+    "db:seed:demo": "tsx scripts/seed-demo.ts",
     "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:migrate": "tsx scripts/migrate.ts",

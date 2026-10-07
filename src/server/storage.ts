@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { env } from "./env";
 import { HttpError } from "./http";
-import { storageAdmission } from "./storage-admission";
+import { reserveUploadCapacity } from "@/modules/usage/infrastructure/prisma-upload-capacity";
 const MAX_FILE = 5 * 1024 * 1024;
 const RESERVE = MAX_FILE * 2;
 let decoding = 0;
@@ -41,19 +41,15 @@ function storagePath(key: string) {
   if (!/^[a-f0-9-]{36}\.webp$/.test(key)) throw new HttpError(404, "Lampiran tidak ditemukan.");
   return path.join(path.resolve(env().STORAGE_DIR), key);
 }
-export async function stageAttachment(file: File) {
+export async function stageAttachment(file: File | Uint8Array, companyId: string) {
   const config = env(), id = randomUUID(), key = id + ".webp";
   await mkdir(config.STORAGE_DIR, { recursive: true, mode: 0o700 });
-  await db.$transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(178232)`;
-    const used = await tx.storageBudget.findUniqueOrThrow({ where: { id: 1 } });
-    const reserved = await tx.uploadReservation.aggregate({ _sum: { bytes: true } });
-    const disk = await statfs(config.STORAGE_DIR);
-    if (!storageAdmission({ free: disk.bavail * disk.bsize, floor: config.MIN_FREE_BYTES, reserved: Number(reserved._sum.bytes ?? 0), needed: RESERVE, used: Number(used.used), quota: config.STORAGE_QUOTA_BYTES })) throw new HttpError(503, "Kapasitas screenshot tidak mencukupi.", "UPLOAD_CAPACITY_UNAVAILABLE");
-    await tx.uploadReservation.create({ data: { id, bytes: RESERVE } });
+  await reserveUploadCapacity(db, companyId, id, BigInt(RESERVE), async () => {
+    const disk = await statfs(config.STORAGE_DIR, { bigint: true });
+    return { free: disk.bavail * disk.bsize, floor: BigInt(config.MIN_FREE_BYTES), quota: BigInt(config.STORAGE_QUOTA_BYTES) };
   });
   try {
-    const output = await normalizeImage(Buffer.from(await file.arrayBuffer()));
+    const output = await normalizeImage(file instanceof Uint8Array ? Buffer.from(file) : Buffer.from(await file.arrayBuffer()));
     await writeFile(storagePath(key), output, { flag: "wx", mode: 0o600 });
     return { id, key, size: output.length, mime: "image/webp", filename: "screenshot.webp" };
   } catch (error) { await discardAttachment(id, key); throw error; }

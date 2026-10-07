@@ -87,7 +87,7 @@ test("anonymous retries, conflicting payloads, invalid files and request limits"
   const invalid = await request.post("/api/feedback", { multipart: { ...input, submissionId: crypto.randomUUID(), screenshot: { name: "fake.png", mimeType: "image/png", buffer: Buffer.from("this is not an image") } } }); expect(invalid.status()).toBe(415);
   const throttled = await request.post("/api/feedback", { multipart: { ...input, submissionId: crypto.randomUUID() } }); expect(throttled.status()).toBe(429);
   const items = await (await request.get("/api/admin/feedback?q=Idempotency")).json(); expect(items.total).toBe(1);
-  const signup = await request.post("/api/auth/sign-up/email", { headers: { Origin: origin }, data: { name: "Other", email: "other@example.com", password } }); expect(signup.status()).toBe(403);
+  const signup = await request.post("/api/auth/sign-up/email", { headers: { Origin: "https://evil.example" }, data: { name: "Other", email: "other@example.com", password } }); expect(signup.status()).toBe(403);
   const noOrigin = await request.patch("/api/admin/site", { data: { name: "Bad", origin: "http://localhost:3200", buttonLabel: "Bad", position: "left" } }); expect(noOrigin.status()).toBe(403);
   const huge = await request.post("/api/feedback", { headers: { "Content-Type": "multipart/form-data; boundary=bad" }, data: Buffer.alloc(6 * 1024 * 1024 + 1) }); expect([413, 429]).toContain(huge.status());
   await request.storageState({ path: "test-results/admin-state.json" });

@@ -13,10 +13,11 @@ export async function bootstrap(input: unknown) {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(178231)`;
     if (await tx.installation.findUnique({ where: { id: 1 } })) throw new HttpError(409, "Setup sudah selesai.");
     const id = randomUUID();
-    await tx.user.create({ data: { id, name: data.name, email: data.email, emailVerified: true } });
+    await tx.user.create({ data: { id, name: data.name, email: data.email, emailVerified: true, platformRole: "PLATFORM_OWNER" } });
     await tx.account.create({ data: { id: randomUUID(), userId: id, accountId: id, providerId: "credential", password } });
     await tx.storageBudget.create({ data: { id: 1 } });
     await tx.installation.create({ data: { id: 1, adminId: id } });
+    await tx.auditEvent.create({ data: { actorId: id, actorSnapshot: id, action: "PLATFORM_BOOTSTRAPPED", resourceId: "1" } });
     return { success: true };
   });
 }
