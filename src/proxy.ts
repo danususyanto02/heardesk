@@ -11,6 +11,8 @@ export async function proxy(request: NextRequest) {
   const dev = process.env.NODE_ENV !== "production";
   const csp = `default-src 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'${dev ? " ws: " : ""}; frame-src 'self'; frame-ancestors ${ancestors}; base-uri 'none'; object-src 'none'; form-action 'self'`;
   const requestHeaders = new Headers(request.headers); requestHeaders.set("x-nonce", nonce); requestHeaders.set("Content-Security-Policy", csp);
+  requestHeaders.delete("x-heardesk-company");
+  const company=request.nextUrl.searchParams.get("company");if(company&&company.length<=200)requestHeaders.set("x-heardesk-company",company);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp); response.headers.set("X-Content-Type-Options", "nosniff"); response.headers.set("Referrer-Policy", "no-referrer"); response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   response.headers.set("Cache-Control", "private, no-store");

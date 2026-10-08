@@ -8,10 +8,10 @@ test("public landing demo never writes feedback and works on mobile", async ({ p
   page.on("request", r => { if (r.url().includes("/api/feedback") && r.method() === "POST") submissions.push(r.url()); });
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Siapkan instalasi", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Masuk admin", exact: true }).first()).toHaveAttribute("href", "/login");
-  await page.getByRole("button", { name: "Coba widget", exact: true }).click();
-  const demo = page.getByRole("dialog", { name: "Demo widget" });
+  await expect(page.getByRole("link", { name: "Set up HearDesk", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Sign in", exact: true }).first()).toHaveAttribute("href", "/login");
+  await page.getByRole("button", { name: "Try the widget", exact: true }).click();
+  const demo = page.getByRole("dialog", { name: "Widget demo" });
   await expect(demo).toBeVisible();
   await demo.getByRole("button", { name: "Kirim simulasi", exact: true }).click();
   await expect(demo.getByRole("alert")).toContainText("Pesan wajib diisi");
@@ -28,7 +28,7 @@ test("public landing demo never writes feedback and works on mobile", async ({ p
   await expect(demo.getByRole("heading", { name: "Simulasi selesai" })).toBeVisible();
   await expect(demo.getByText("Tidak ada pesan, email, atau screenshot yang dikirim ke server.")).toBeVisible();
   await page.keyboard.press("Escape"); await expect(demo).toBeHidden();
-  await expect(page.getByRole("button", { name: "Coba widget", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Try the widget", exact: true })).toBeFocused();
   for (const width of [390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -36,11 +36,11 @@ test("public landing demo never writes feedback and works on mobile", async ({ p
   await page.screenshot({ path: "test-results/landing-desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "test-results/landing-mobile.png", fullPage: true });
-  await page.getByRole("button", { name: "Coba widget", exact: true }).click();
+  await page.getByRole("button", { name: "Try the widget", exact: true }).click();
   await expect(demo).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await demo.getByRole("button", { name: "Tutup formulir" }).click(); await expect(demo).toBeHidden();
-  await page.getByRole("link", { name: "Dokumentasi", exact: true }).first().click();
+  await page.getByRole("link", { name: "Installation guide", exact: true }).first().click();
   await expect(page.getByRole("heading", { name: "Pasang uReport di server Anda" })).toBeVisible();
   const after = await (await request.get("/api/admin/feedback")).json();
   expect(after.total).toBe(before.total); expect(submissions).toEqual([]); expect(errors).toEqual([]);

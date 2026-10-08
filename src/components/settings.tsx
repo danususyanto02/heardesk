@@ -4,24 +4,27 @@ import { useRouter } from "next/navigation";
 import { Copy, Check, ArrowsClockwise, X } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { FeedbackForm } from "./feedback-form";
+import {SettingsSkeleton} from "./skeleton";
 
 type Site = { id: number; companyId: string; name: string; origin: string; buttonLabel: string; position: string; publicKey: string };
 type Configuration = { configured: boolean; appUrl: string } & Partial<Site>;
 
-export function Settings() {
+export function Settings({companyId,siteId}:{companyId?:string;siteId?:number}={}) {
   const router = useRouter();
   const [configuration, setConfiguration] = useState<Configuration | null>(null), [draft, setDraft] = useState<Site | null>(null), [address, setAddress] = useState("");
   const [error, setError] = useState(""), [busy, setBusy] = useState(false), [rotating, setRotating] = useState(false), [notice, setNotice] = useState(""), [copied, setCopied] = useState(""), [retry, setRetry] = useState(0);
   const confirmation = useRef<HTMLDialogElement>(null);
+  useEffect(()=>{if(!configuration?.configured)return;const id=location.hash.slice(1);if(!["installation-code","website-settings"].includes(id))return;const timer=setTimeout(()=>document.getElementById(id)?.scrollIntoView({block:"start"}),0);return()=>clearTimeout(timer);},[configuration?.configured,configuration?.id]);
   useEffect(() => {
-    let active = true; setError("");
-    api<Configuration>("/api/admin/site").then(data => {
+    let active = true; setError("");setConfiguration(null);setDraft(null);setNotice("");setCopied("");confirmation.current?.close();
+    const request=companyId&&siteId?api<Site>(`/api/companies/${companyId}/sites/${siteId}`).then(data=>({...data,configured:true,appUrl:location.origin})):api<Configuration>("/api/admin/site");
+    request.then(data => {
       if (!active) return;
       setConfiguration(data);
       if (data.configured) setDraft(data as Configuration & Site);
     }).catch(error => { if (active) setError(error.message); });
     return () => { active = false; };
-  }, [retry]);
+  }, [retry,companyId,siteId]);
 
   async function connect(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError("");
@@ -55,13 +58,13 @@ export function Settings() {
     } catch (error) { setError((error as Error).message); } finally { setRotating(false); }
   }
 
-  if (!configuration) return <section className="empty-state">{error ? <><p className="error" role="alert">{error}</p><button className="btn" onClick={() => setRetry(retry + 1)}>Coba lagi</button></> : <p role="status">Memuat pengaturan…</p>}</section>;
+  if (!configuration) return error?<section className="empty-state"><p className="error" role="alert">{error}</p><button className="btn" onClick={() => setRetry(retry + 1)}>Coba lagi</button></section>:<SettingsSkeleton/>;
   if (!configuration.configured || !draft) return <><div className="page-heading"><div><h1>Tambahkan website</h1><p className="muted">Di website mana tombol laporan akan ditampilkan?</p></div></div><section className="onboarding-panel"><form className="form-stack" onSubmit={connect}><label htmlFor="website-address">Alamat website</label><input id="website-address" type="url" value={address} onChange={e => setAddress(e.target.value)} required maxLength={2048} placeholder="https://website.example" disabled={busy}/><p className="helper">Tempel alamat website atau salah satu halamannya. Setelah disimpan, kode pemasangan langsung tersedia.</p>{error && <p className="error" role="alert">{error}</p>}<button className="btn primary" disabled={busy}>{busy ? "Menambahkan…" : "Tambahkan website"}</button></form></section></>;
 
   const snippet = `<script src="${configuration.appUrl}/widget.js" data-site="${configuration.publicKey}" defer></script>`;
   return <><div className="page-heading"><div><h1>Website</h1><p className="muted">Pasang tombol laporan dengan menyalin kode di bawah.</p></div></div><div className="settings-grid"><form onSubmit={save} className="settings-panel">
-    <section><h2>Kode pemasangan</h2><p className="helper">Salin seluruh kode ini dan tempel sebelum &lt;/body&gt; pada <strong>{configuration.origin}</strong>. Tidak perlu mengisi kode lain.</p><pre><code>{snippet}</code></pre><button className="btn primary" type="button" onClick={() => copy(snippet, "snippet")}>{copied === "snippet" ? <Check/> : <Copy/>}{copied === "snippet" ? "Kode tersalin" : "Salin kode"}</button></section>
-    <fieldset disabled={busy || rotating} className="settings-fields"><section><h2>Website Anda</h2><label>Nama website<input value={draft.name} required maxLength={100} onChange={e => change("name", e.target.value)}/></label><label>Alamat website<input value={draft.origin} type="url" required onChange={e => change("origin", e.target.value)}/><span className="helper">Tombol laporan hanya tampil pada alamat ini. Jika memakai www atau subdomain, isi alamat yang tepat.</span></label></section>
+    <section id="installation-code"><h2>Kode pemasangan</h2><p className="helper">Salin seluruh kode ini dan tempel sebelum &lt;/body&gt; pada <strong>{configuration.origin}</strong>. Tidak perlu mengisi kode lain.</p><pre><code>{snippet}</code></pre><button className="btn primary" type="button" onClick={() => copy(snippet, "snippet")}>{copied === "snippet" ? <Check/> : <Copy/>}{copied === "snippet" ? "Kode tersalin" : "Salin kode"}</button></section>
+    <fieldset disabled={busy || rotating} className="settings-fields"><section id="website-settings"><h2>Website Anda</h2><label>Nama website<input value={draft.name} required maxLength={100} onChange={e => change("name", e.target.value)}/></label><label>Alamat website<input value={draft.origin} type="url" required onChange={e => change("origin", e.target.value)}/><span className="helper">Tombol laporan hanya tampil pada alamat ini. Jika memakai www atau subdomain, isi alamat yang tepat.</span></label></section>
     <section><h2>Tampilan tombol</h2><label>Teks tombol<input value={draft.buttonLabel} required maxLength={40} onChange={e => change("buttonLabel", e.target.value)}/></label><fieldset><legend>Posisi tombol</legend><div className="radio-options">{["left", "right"].map(position => <label key={position}><input name="position" type="radio" checked={draft.position === position} onChange={() => change("position", position)}/>{position === "left" ? "Kiri bawah" : "Kanan bawah"}</label>)}</div></fieldset></section></fieldset>
     <details className="disclosure settings-advanced"><summary>Pengaturan lanjutan</summary><p className="helper">Perbarui kode pemasangan jika perlu menghentikan penggunaan kode lama. Laporan yang sudah diterima tetap tersimpan.</p><button className="btn" type="button" disabled={busy || rotating} onClick={() => confirmation.current?.showModal()}><ArrowsClockwise/>Perbarui kode pemasangan</button></details>
     {error && !confirmation.current?.open && <p className="error" role="alert">{error}</p>}<div className="settings-actions"><button className="btn primary" disabled={busy || rotating}>{busy ? "Menyimpan…" : "Simpan pengaturan"}</button><p className="helper" role="status">{notice}</p></div></form>

@@ -1,11 +1,13 @@
 import type { SessionReader } from "../../identity/domain/session";
 import { requirePlatformOwner } from "../../identity/application/require-platform-owner";
 import type { PlatformRepository, PlatformQuery, StatusChange, LimitsChange } from "../domain/platform-repository";
+import { pagination } from "../../shared/domain/pagination";
 
 function invalid(): never { throw Object.assign(new Error("Check platform action details."), { code: "PLATFORM_INPUT_INVALID" }); }
 function validateQuery(query: PlatformQuery): PlatformQuery {
   if (typeof query.q !== "string" || query.q.length > 200 || !Number.isInteger(query.page) || query.page < 1 || query.page > 100000) invalid();
-  return { q: query.q.trim(), page: query.page };
+  pagination(0, query.page, query.pageSize);
+  return { q: query.q.trim(), page: query.page, pageSize: query.pageSize ?? 25 };
 }
 function validateChange(input: { reason: string; expectedUpdatedAt: string }) {
   if (typeof input.reason !== "string" || !input.reason.trim() || input.reason.trim().length > 500 || !Number.isFinite(Date.parse(input.expectedUpdatedAt))) invalid();

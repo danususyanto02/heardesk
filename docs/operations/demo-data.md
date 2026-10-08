@@ -4,6 +4,8 @@ Run `npm.cmd run db:seed:demo` from project root to seed current configured urep
 
 Dataset is illustrative, labeled `(Demo)` on Companies/websites/users and `[Demo]` on reports/notes/audit reasons. Emails and origins use reserved `.example.test` addresses. No credential accounts/passwords are created for demo identities; they cannot sign in. Existing installation Platform Owner gains OWNER membership in each demo Company for preview purposes only.
 
+Optional local login: owner requested client-account testing; `admin@northstar.example.test` now has a credential account and verified email, retains USER platform role and ADMIN membership in Northstar only. Password supplied at provisioning through HEARDESK_DEMO_PASSWORD, hashed with Better Auth, not recorded in source/docs. Run `npm.cmd run db:seed:demo -- --enable-login` with that environment variable to provision only if absent; existing credential is never reset. Requires loopback APP_URL and verified installation Platform Owner. Live HTTP login200/CompanyADMIN/platformAPI403 checked. Other demo users remain without credentials. Use password reset rather than overwriting an existing demo credential.
+
 | Company | Status | Websites | Team demo users | Reports |
 | --- | --- | --- | --- | --- |
 | Northstar Commerce (Demo) | Active | 2 | Admin/Agent/Viewer | 12 |

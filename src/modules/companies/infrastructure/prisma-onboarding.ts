@@ -11,6 +11,7 @@ export function prismaOnboarding(db: PrismaClient, limits: DefaultCompanyLimits)
         await tx.$queryRaw`SELECT id FROM "user" WHERE id = ${actor.userId} FOR UPDATE`;
         const user = await tx.user.findUnique({ where: { id: actor.userId } });
         if (!user?.emailVerified) throw new CompanyAccessError("EMAIL_NOT_VERIFIED");
+        if(user.accountStatus!=="ACTIVE")throw Object.assign(new Error("Account suspended"),{code:"ACCOUNT_SUSPENDED"});
         const fingerprint = createHash("sha256").update(input.name).digest("hex");
         const existing = await tx.companyCreationRequest.findUnique({ where: { userId_idempotencyKey: { userId: actor.userId, idempotencyKey: input.idempotencyKey } }, include: { company: { include: { profile: true } } } });
         if (existing) {
