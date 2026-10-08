@@ -6,6 +6,9 @@ import { authorizeCompany } from "../application/authorize-company";
 export function createCompanyAccess(db: PrismaClient) {
   async function run<T>(write: boolean, actor: Actor, companyId: CompanyId, permission: Permission, work: (scope: AuthorizedCompany, tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
     return db.$transaction(async tx => {
+      if(write) await tx.$queryRaw`SELECT id FROM "user" WHERE id = ${actor.userId} FOR SHARE`;
+      const identity=await tx.user.findUnique({where:{id:actor.userId},select:{accountStatus:true,emailVerified:true}});
+      if(identity?.accountStatus!=="ACTIVE"||!identity.emailVerified)throw Object.assign(new Error("Account unavailable"),{code:"ACCOUNT_SUSPENDED"});
       if (write) await tx.$queryRaw`SELECT "organizationId" FROM "CompanyProfile" WHERE "organizationId" = ${companyId} FOR UPDATE`;
       const member = await tx.member.findUnique({ where: { organizationId_userId: { organizationId: companyId, userId: actor.userId } }, include: { organization: { select: { profile: true } } } });
       const profile = member?.organization.profile;

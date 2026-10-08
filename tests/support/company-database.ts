@@ -14,7 +14,7 @@ export async function companyDatabase() {
   const client = await operator.connect();
   try {
     await client.query(`CREATE SCHEMA "${schema}"; SET search_path TO "${schema}"`);
-    for (const migration of ["202610050001_initial", "202610050002_singletons", "202610050003_companies"]) {
+    for (const migration of ["202610050001_initial", "202610050002_singletons", "202610050003_companies", "202610080004_user_status"]) {
       await client.query(await readFile(path.resolve("prisma/migrations", migration, "migration.sql"), "utf8"));
     }
     const role = '"' + decodeURIComponent(new URL(process.env.DATABASE_URL!).username).replaceAll('"', '""') + '"';

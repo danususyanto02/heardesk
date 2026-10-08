@@ -6,14 +6,14 @@ import { requireActor } from "./auth";
 import { companyDefaults } from "./company-defaults";
 import { createCompanyServices } from "./composition/company-services";
 import { cookies } from "next/headers";
+import {createCompanyAccess} from "@/modules/companies/infrastructure/prisma-company-access";
 
 export async function defaultSite(requestHeaders?: Headers) {
   const actor = await requireActor(requestHeaders);
   const selected = requestHeaders?.get("x-heardesk-company") ?? (await cookies()).get("heardesk-company")?.value;
   const membership = await db.member.findFirst({ where: { userId: actor.userId, ...(selected ? { organizationId: selected } : {}) }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
   if (!membership) return null;
-  const sites = await createCompanyServices(db).listWebsites(actor, membership.organizationId);
-  return sites[0] ?? null;
+  return createCompanyAccess(db).read(actor,membership.organizationId,"sites:read",async(scope,tx)=>tx.site.findFirst({where:{companyId:scope.companyId},orderBy:{id:"asc"}}));
 }
 export async function connectSite(input: unknown, requestHeaders?: Headers) {
   const { address } = connectSiteInput.parse(input);

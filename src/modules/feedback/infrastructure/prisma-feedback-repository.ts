@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { FeedbackRepository, FeedbackItem } from "../domain/feedback-repository";
 import { CompanyAccessError } from "../../companies/domain/access";
+import { pagination } from "../../shared/domain/pagination";
 
 export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackRepository {
   function item(row: { id: string; message: string; type: FeedbackItem["type"]; status: FeedbackItem["status"]; siteId: number; createdAt: Date; attachment: { id: string } | null }): FeedbackItem {
@@ -11,9 +12,9 @@ export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackReposi
       if (query.siteId && !await tx.site.findFirst({ where: { id: query.siteId, companyId: scope.companyId } })) throw new CompanyAccessError("RESOURCE_NOT_FOUND");
       const where: Prisma.FeedbackWhereInput = { site: { companyId: scope.companyId }, ...(query.siteId ? { siteId: query.siteId } : {}), type: query.type, status: query.status,
         ...(query.q ? { message: { contains: query.q, mode: "insensitive" } } : {}), ...(query.from || query.to ? { createdAt: { gte: query.from ? new Date(query.from) : undefined, lt: query.to ? new Date(query.to) : undefined } } : {}) };
-      const total = await tx.feedback.count({ where }), page = Math.min(query.page, Math.max(1, Math.ceil(total / 20)));
-      const rows = await tx.feedback.findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: [{ createdAt: "desc" }, { id: "desc" }], include: { attachment: { select: { id: true } } } });
-      return { items: rows.map(item), total, page, pageSize: 20 };
+      const total = await tx.feedback.count({ where }), { page, pageSize, take, skip } = pagination(total, query.page, query.pageSize);
+      const rows = await tx.feedback.findMany({ where, take, skip, orderBy: [{ createdAt: "desc" }, { id: "desc" }], include: { attachment: { select: { id: true } } } });
+      return { items: rows.map(item), total, page, pageSize };
     },
     async detail(scope, id) {
       const row = await tx.feedback.findFirst({ where: { id, site: { companyId: scope.companyId } }, include: { attachment: true, notes: { orderBy: { createdAt: "asc" }, include: { author: { select: { id: true, name: true } } } } } });

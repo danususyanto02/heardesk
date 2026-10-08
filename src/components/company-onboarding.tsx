@@ -5,9 +5,10 @@ import type { CompanySummary } from "@/modules/companies/domain/onboarding";
 
 export function CompanyOnboarding({ companies }: { companies: readonly CompanySummary[] }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState(""), [key, setKey] = useState<string | null>(null);
+  const [selected,setSelected]=useState<string|null>(null),[creating,setCreating]=useState(companies.length===0);
   async function open(id: string) {
     setBusy(true); setError("");
-    try { await api("/api/companies/active", { method: "POST", body: JSON.stringify({ companyId: id }) }); location.assign("/settings"); }
+    try { await api("/api/companies/active", { method: "POST", body: JSON.stringify({ companyId: id }) }); location.assign("/settings?company="+encodeURIComponent(id)); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not open Company."); setBusy(false); }
   }
   async function create(event: React.FormEvent<HTMLFormElement>) {
@@ -17,8 +18,8 @@ export function CompanyOnboarding({ companies }: { companies: readonly CompanySu
     catch (cause) { setError(cause instanceof Error ? cause.message : "Company creation failed. Retry with the same details."); setBusy(false); }
   }
   return <div className="auth-page"><a className="brand" href="/">HearDesk</a><section className="auth-panel"><h1>{companies.length ? "Choose your Company" : "Create your Company"}</h1><p className="muted">Each Company has its own websites, team, and feedback inbox.</p>
-    {companies.length > 0 && <ul>{companies.map(company => <li key={company.id}><button className="btn quiet" disabled={busy || company.status !== "ACTIVE"} onClick={() => open(company.id)}>Open {company.name}</button>{company.status === "SUSPENDED" && <span>Suspended</span>}</li>)}</ul>}
-    <form className="form-stack" onSubmit={create}><label>Company name<input name="name" required maxLength={120} onChange={() => { if (!busy) setKey(null); }}/></label>{error && <p className="error" role="alert">{error}</p>}<button className="btn primary full" disabled={busy}>{busy ? "Creating..." : "Create Company"}</button></form>
+    {companies.length > 0 && <><div className="company-choices" role="radiogroup" aria-label="Choose Company">{companies.map(company => <label className={`company-choice ${selected===company.id?"selected":""}`} key={company.id}><input type="radio" name="company" value={company.id} checked={selected===company.id} disabled={busy||company.status!=="ACTIVE"} onChange={()=>setSelected(company.id)}/><span><strong>{company.name}</strong><span className="helper">{company.role} · {company.status==="ACTIVE"?"Active":"Suspended"}</span></span>{selected===company.id&&<span className="company-selected">Selected</span>}</label>)}</div><button className="btn primary full" disabled={busy||!selected} onClick={()=>selected&&open(selected)}>{busy?"Opening Company...":"Open selected Company"}</button><button className="btn quiet" disabled={busy} onClick={()=>setCreating(!creating)}>{creating?"Cancel new Company":"Create another Company"}</button></>}
+    {creating&&<form className="form-stack" onSubmit={create}><label>Company name<input name="name" required maxLength={120} onChange={() => { if (!busy) setKey(null); }}/></label><p className="helper">Create a separate Company for a different business or team. Add more websites inside your existing Company.</p><button className="btn primary full" disabled={busy}>{busy ? "Creating..." : "Create Company"}</button></form>}{error&&<p className="error" role="alert">{error}</p>}
     <p><button className="btn quiet" disabled={busy} onClick={async () => { try { await api("/api/auth/sign-out", { method: "POST", body: "{}" }); location.assign("/login"); } catch { setError("Sign out failed. Try again."); } }}>Sign out</button></p>
   </section></div>;
 }

@@ -18,8 +18,8 @@ test("setup, private admin, anonymous widget, attachments and logout", async ({ 
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
   expect((await request.get("/api/admin/feedback")).status()).toBe(401);
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Terima masukan pengunjung. Kelola di server sendiri." })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Siapkan instalasi", exact: true }).first()).toHaveAttribute("href", "/setup");
+  await expect(page.getByRole("heading", { level: 1, name: /Website feedback,\s*in one place\./ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Set up HearDesk", exact: true }).first()).toHaveAttribute("href", "/setup");
   await page.goto("/setup");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

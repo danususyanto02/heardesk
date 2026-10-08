@@ -114,8 +114,8 @@ try {
     const pool = new pg.Pool({ connectionString: runtime.DATABASE_URL });
     try {
       const initial = (await pool.query('SELECT u."platformRole",m.role,s."publicKey",s.origin,l."websiteLimit",l."seatLimit",l."monthlyReportLimit",l."storageBytesLimit" FROM "Installation" i JOIN "user" u ON u.id=i."adminId" JOIN member m ON m."userId"=u.id JOIN "Site" s ON s."companyId"=m."organizationId" JOIN "CompanyLimits" l ON l."companyId"=m."organizationId" WHERE i.id=1')).rows;
-      if (initial.length !== 1 || initial[0].platformRole !== "PLATFORM_OWNER" || initial[0].role !== "OWNER") throw new Error("Initial ownership invalid.");
-      const row = initial[0];
+      if (!initial.length || initial.some(row=>row.platformRole!=="PLATFORM_OWNER"||row.role!=="OWNER")) throw new Error("Initial ownership invalid.");
+      const row = initial.find(row=>!row.origin.includes(".example.test"))??initial[0];
       const root = runtime.APP_URL.replace(/\/$/, "");
       const widget = await fetch(`${root}/widget/${encodeURIComponent(row.publicKey)}?parentOrigin=${encodeURIComponent(row.origin)}`);
       if (!widget.ok || !widget.headers.get("content-security-policy")?.includes(row.origin)) throw new Error("Existing widget/CSP smoke failed.");

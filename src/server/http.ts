@@ -9,6 +9,8 @@ export const privateHeaders = { "Cache-Control": "private, no-store", "X-Content
 export function json(value: unknown, status = 200) { return Response.json(value, { status, headers: privateHeaders }); }
 export function failure(error: unknown) {
   const id = randomUUID();
+  if(error instanceof Error&&"code" in error&&error.code==="ACCOUNT_SUSPENDED")return json({error:{code:error.code,message:"Account suspended. Contact HearDesk support.",requestId:id}},403);
+  if (error instanceof Error && "code" in error && error.code === "PLATFORM_OWNER_PROTECTED") return json({error:{code:error.code,message:"Platform Owner accounts cannot be suspended here.",requestId:id}},403);
   if (error instanceof Error && "code" in error && error.code === "EMAIL_NOT_VERIFIED") return json({ error: { code: error.code, message: "Verify your email before continuing.", requestId: id } }, 403);
   if (error instanceof Error && "code" in error && ["PLATFORM_FORBIDDEN", "PLATFORM_INPUT_INVALID", "PLATFORM_NOT_FOUND", "PLATFORM_CONFLICT"].includes(String(error.code))) return json({ error: { code: error.code, message: error.code === "PLATFORM_CONFLICT" ? "Company changed. Reload before trying again." : error.code === "PLATFORM_INPUT_INVALID" ? "Check the limits, reason and action details." : error.code === "PLATFORM_NOT_FOUND" ? "Company not found." : "Platform Owner access required.", requestId: id } }, error.code === "PLATFORM_FORBIDDEN" ? 403 : error.code === "PLATFORM_INPUT_INVALID" ? 400 : error.code === "PLATFORM_NOT_FOUND" ? 404 : 409);
   if (error instanceof Error && "code" in error && error.code === "IDEMPOTENCY_CONFLICT") return json({ error: { code: error.code, message: "Creation key already used. Start a new Company request.", requestId: id } }, 409);
