@@ -6,6 +6,12 @@ test("Company monthly line chart and three Excel periods match aggregate data",a
   await page.goto("/inbox");
   await expect(page.getByRole("heading",{name:"Feedback per bulan",exact:true})).toBeVisible();
   await expect(page.locator(".inbox-line-chart .highcharts-container")).toHaveCount(1);
+  const heading=page.getByTestId("analytics-heading"),summary=page.getByTestId("analytics-summary");
+  expect(await heading.evaluate(el=>getComputedStyle(el).borderBottomWidth)).toBe("1px");
+  expect(await summary.evaluate(el=>getComputedStyle(el).borderBottomWidth)).toBe("1px");
+  const yearBox=await page.getByLabel("Tahun grafik").boundingBox(),headingBox=await heading.boundingBox();
+  expect(yearBox!.y).toBeGreaterThanOrEqual(headingBox!.y+headingBox!.height);
+  await page.screenshot({path:"test-results/inbox-summary-desktop.png",fullPage:true});
   const id=await page.locator("[data-company-id]").getAttribute("data-company-id");
   const year=new Date().getUTCFullYear(),month=new Date().getUTCMonth()+1;
   const report=await(await page.request.get(`/api/companies/${id}/feedback/statistics?period=annual&year=${year}`)).json();
