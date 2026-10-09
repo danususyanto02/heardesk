@@ -1,2 +1,4 @@
-import {PageSkeleton} from "@/components/skeleton";
-export default function Loading(){return <PageSkeleton label="Memuat halaman Company"/>;}
+import { PageSkeleton } from "@/components/skeleton";
+export default function Loading() {
+  return <PageSkeleton label="Memuat halaman Company" />;
+}

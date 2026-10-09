@@ -16,6 +16,16 @@ export interface CompanyTransaction {
   audit: AuditWriter;
 }
 export interface CompanyUnitOfWork<Repositories = CompanyTransaction> {
-  read<T>(actor: Actor, companyId: CompanyId, permission: Permission, work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>): Promise<T>;
-  write<T>(actor: Actor, companyId: CompanyId, permission: Permission, work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>): Promise<T>;
+  read<T>(
+    actor: Actor,
+    companyId: CompanyId,
+    permission: Permission,
+    work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>,
+  ): Promise<T>;
+  write<T>(
+    actor: Actor,
+    companyId: CompanyId,
+    permission: Permission,
+    work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>,
+  ): Promise<T>;
 }

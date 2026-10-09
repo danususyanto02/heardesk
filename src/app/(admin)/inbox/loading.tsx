@@ -1,2 +1,4 @@
-import {InboxPageSkeleton} from "@/components/skeleton";
-export default function Loading(){return <InboxPageSkeleton/>;}
+import { InboxPageSkeleton } from "@/components/skeleton";
+export default function Loading() {
+  return <InboxPageSkeleton />;
+}

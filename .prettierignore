@@ -1,0 +1,34 @@
+# Build output
+.next/
+.next-heardesk/
+node_modules/
+dist/
+
+# Generated
+src/generated/
+next-env.d.ts
+prisma/migrations/
+
+# Lockfile
+package-lock.json
+
+# Storage and backups
+storage/
+backups/
+
+# Test artifacts
+test-results/
+playwright-report/
+integration-test.html
+*.tsbuildinfo
+
+# AI and planning
+.superpowers/
+.needmcp/
+docs/superpowers/
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.migration.example

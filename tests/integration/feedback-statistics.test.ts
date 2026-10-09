@@ -1,10 +1,106 @@
-import {afterAll,beforeAll,expect,it} from "vitest";
-import {companyDatabase,seedCompanies} from "../support/company-database";
-import {createFeedbackStatistics} from "@/server/composition/feedback-statistics";
-let fixture:Awaited<ReturnType<typeof companyDatabase>>,siteId:number;
-const actor={userId:"alice",emailVerified:true,platformRole:"USER" as const};
-beforeAll(async()=>{fixture=await companyDatabase();await seedCompanies(fixture.db);siteId=(await fixture.db.site.create({data:{companyId:"x",name:"X",origin:"https://x.test",publicKey:"key-x"}})).id;const y=(await fixture.db.site.create({data:{companyId:"y",name:"Y",origin:"https://y.test",publicKey:"key-y"}})).id;await fixture.db.feedback.createMany({data:[{id:"jan",siteId,submissionId:"jan",fingerprint:"h",message:"Jan",type:"ISSUE",createdAt:new Date("2026-01-01T00:00:00Z")},{id:"feb",siteId,submissionId:"feb",fingerprint:"h",message:"Feb",type:"SUGGESTION",createdAt:new Date("2026-02-28T23:59:59Z")},{id:"leap",siteId,submissionId:"leap",fingerprint:"h",message:"Leap",type:"COMPLIMENT",status:"ARCHIVED",createdAt:new Date("2024-02-29T12:00:00Z")},{id:"foreign",siteId:y,submissionId:"f",fingerprint:"h",message:"Foreign",type:"ISSUE",createdAt:new Date("2026-01-01")}]});});
-afterAll(async()=>{await fixture?.close();});
-it("annual counts are Company-scoped, fill all months and include archived feedback",async()=>{const service=createFeedbackStatistics(fixture.db,{now:()=>new Date("2026-10-08")});const annual=await service.report(actor,"x",{period:"annual",year:2026});expect(annual.rows).toHaveLength(12);expect(annual.totals).toEqual({issues:1,suggestions:1,compliments:0,total:2});expect(annual.rows[0].issues).toBe(1);expect(annual.rows[1].suggestions).toBe(1);expect(annual.years).toEqual([2026,2024]);const leap=await service.report(actor,"x",{period:"monthly",year:2024,month:2,siteId});expect(leap.rows).toHaveLength(29);expect(leap.rows[28].compliments).toBe(1);});
-it("all periods spans first feedback through current month, no pagination clipping",async()=>{const data=await createFeedbackStatistics(fixture.db,{now:()=>new Date("2026-10-08")}).report(actor,"x",{period:"all"});expect(data.rows[0].label).toBe("2024-02");expect(data.rows.at(-1)?.label).toBe("2026-10");expect(data.totals.total).toBe(3);});
-it("foreign Company/site and suspended Company cannot query or export",async()=>{const service=createFeedbackStatistics(fixture.db,{now:()=>new Date("2026-10-08")});await expect(service.report(actor,"y",{period:"annual",year:2026})).rejects.toMatchObject({code:"COMPANY_NOT_FOUND"});const y=await fixture.db.site.findFirstOrThrow({where:{companyId:"y"}});await expect(service.report(actor,"x",{period:"all",siteId:y.id})).rejects.toMatchObject({code:"RESOURCE_NOT_FOUND"});await fixture.db.companyProfile.update({where:{organizationId:"x"},data:{status:"SUSPENDED"}});await expect(service.report(actor,"x",{period:"all"})).rejects.toMatchObject({code:"COMPANY_SUSPENDED"});});
+import { afterAll, beforeAll, expect, it } from "vitest";
+import { companyDatabase, seedCompanies } from "../support/company-database";
+import { createFeedbackStatistics } from "@/server/composition/feedback-statistics";
+let fixture: Awaited<ReturnType<typeof companyDatabase>>;
+let siteId: number;
+const actor = { userId: "alice", emailVerified: true, platformRole: "USER" as const };
+beforeAll(async () => {
+  fixture = await companyDatabase();
+  await seedCompanies(fixture.db);
+  siteId = (
+    await fixture.db.site.create({
+      data: { companyId: "x", name: "X", origin: "https://x.test", publicKey: "key-x" },
+    })
+  ).id;
+  const y = (
+    await fixture.db.site.create({
+      data: { companyId: "y", name: "Y", origin: "https://y.test", publicKey: "key-y" },
+    })
+  ).id;
+  await fixture.db.feedback.createMany({
+    data: [
+      {
+        id: "jan",
+        siteId,
+        submissionId: "jan",
+        fingerprint: "h",
+        message: "Jan",
+        type: "ISSUE",
+        createdAt: new Date("2026-01-01T00:00:00Z"),
+      },
+      {
+        id: "feb",
+        siteId,
+        submissionId: "feb",
+        fingerprint: "h",
+        message: "Feb",
+        type: "SUGGESTION",
+        createdAt: new Date("2026-02-28T23:59:59Z"),
+      },
+      {
+        id: "leap",
+        siteId,
+        submissionId: "leap",
+        fingerprint: "h",
+        message: "Leap",
+        type: "COMPLIMENT",
+        status: "ARCHIVED",
+        createdAt: new Date("2024-02-29T12:00:00Z"),
+      },
+      {
+        id: "foreign",
+        siteId: y,
+        submissionId: "f",
+        fingerprint: "h",
+        message: "Foreign",
+        type: "ISSUE",
+        createdAt: new Date("2026-01-01"),
+      },
+    ],
+  });
+});
+afterAll(async () => {
+  await fixture?.close();
+});
+it("annual counts are Company-scoped, fill all months and include archived feedback", async () => {
+  const service = createFeedbackStatistics(fixture.db, { now: () => new Date("2026-10-08") });
+  const annual = await service.report(actor, "x", { period: "annual", year: 2026 });
+  expect(annual.rows).toHaveLength(12);
+  expect(annual.totals).toEqual({ issues: 1, suggestions: 1, compliments: 0, total: 2 });
+  expect(annual.rows[0].issues).toBe(1);
+  expect(annual.rows[1].suggestions).toBe(1);
+  expect(annual.years).toEqual([2026, 2024]);
+  const leap = await service.report(actor, "x", {
+    period: "monthly",
+    year: 2024,
+    month: 2,
+    siteId,
+  });
+  expect(leap.rows).toHaveLength(29);
+  expect(leap.rows[28].compliments).toBe(1);
+});
+it("all periods spans first feedback through current month, no pagination clipping", async () => {
+  const data = await createFeedbackStatistics(fixture.db, {
+    now: () => new Date("2026-10-08"),
+  }).report(actor, "x", { period: "all" });
+  expect(data.rows[0].label).toBe("2024-02");
+  expect(data.rows.at(-1)?.label).toBe("2026-10");
+  expect(data.totals.total).toBe(3);
+});
+it("foreign Company/site and suspended Company cannot query or export", async () => {
+  const service = createFeedbackStatistics(fixture.db, { now: () => new Date("2026-10-08") });
+  await expect(service.report(actor, "y", { period: "annual", year: 2026 })).rejects.toMatchObject({
+    code: "COMPANY_NOT_FOUND",
+  });
+  const y = await fixture.db.site.findFirstOrThrow({ where: { companyId: "y" } });
+  await expect(service.report(actor, "x", { period: "all", siteId: y.id })).rejects.toMatchObject({
+    code: "RESOURCE_NOT_FOUND",
+  });
+  await fixture.db.companyProfile.update({
+    where: { organizationId: "x" },
+    data: { status: "SUSPENDED" },
+  });
+  await expect(service.report(actor, "x", { period: "all" })).rejects.toMatchObject({
+    code: "COMPANY_SUSPENDED",
+  });
+});
