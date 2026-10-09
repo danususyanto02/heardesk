@@ -6,12 +6,12 @@ Dataset is illustrative, labeled `(Demo)` on Companies/websites/users and `[Demo
 
 Optional local login: owner requested client-account testing; `admin@northstar.example.test` now has a credential account and verified email, retains USER platform role and ADMIN membership in Northstar only. Password supplied at provisioning through HEARDESK_DEMO_PASSWORD, hashed with Better Auth, not recorded in source/docs. Run `npm.cmd run db:seed:demo -- --enable-login` with that environment variable to provision only if absent; existing credential is never reset. Requires loopback APP_URL and verified installation Platform Owner. Live HTTP login200/CompanyADMIN/platformAPI403 checked. Other demo users remain without credentials. Use password reset rather than overwriting an existing demo credential.
 
-| Company | Status | Websites | Team demo users | Reports |
-| --- | --- | --- | --- | --- |
-| Northstar Commerce (Demo) | Active | 2 | Admin/Agent/Viewer | 12 |
-| Paperplane Studio (Demo) | Active | 2 | Admin/Agent/Viewer | 12 |
-| Orbit Learning (Demo) | Active | 2 | Admin/Agent/Viewer | 12 |
-| Harbor Booking (Demo) | Suspended | 2 | Admin/Agent/Viewer | 12 |
+| Company                   | Status    | Websites | Team demo users    | Reports |
+| ------------------------- | --------- | -------- | ------------------ | ------- |
+| Northstar Commerce (Demo) | Active    | 2        | Admin/Agent/Viewer | 12      |
+| Paperplane Studio (Demo)  | Active    | 2        | Admin/Agent/Viewer | 12      |
+| Orbit Learning (Demo)     | Active    | 2        | Admin/Agent/Viewer | 12      |
+| Harbor Booking (Demo)     | Suspended | 2        | Admin/Agent/Viewer | 12      |
 
 Each Company has mixed issue/suggestion/compliment and NEW/REVIEWING/DONE/ARCHIVED reports, optional reserved-domain sender email, 3 notes, and 2 illustrative administrative audit events. Website/team/report/storage limits vary. Screenshot storage remains 0 because no screenshot files are fabricated. Report accounting uses actual createdAt UTC period, so recent demo history can span month boundary.
 

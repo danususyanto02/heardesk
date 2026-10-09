@@ -2,6 +2,8 @@
 
 Use Node.js24 and an isolated PostgreSQL development/test database. Install from lockfile with `npm ci`. Do not use another application's database for schema development, resets, or fixtures.
 
+Run `npm run format` after edits and `npm run format:check` before proposing changes. Use two-space indentation, separate variable declarations, and explicit braces for conditions and loops. Keep blank lines between distinct operations. Replace nested ternaries with named decisions or focused components. `npm run lint` enforces these readability rules; `npm run lint:fix` applies safe syntax fixes. Generated code and applied migrations are excluded.
+
 Before proposing a change run unit tests, typecheck, production build, and dependency audit. Integration/browser tests use `ureport_test` and require both runtime and migration connection URLs pointing at that database. The test runner validates both targets before migrations and cleanup.
 
 Commit migrations with schema changes. Runtime database credentials must not have migration privileges. Never commit `.env`, upload files, visitor messages/screenshots, database backups, or AI planning notes.

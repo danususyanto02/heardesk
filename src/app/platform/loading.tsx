@@ -1,2 +1,4 @@
-import {PageSkeleton} from "@/components/skeleton";
-export default function Loading() { return <PageSkeleton/>; }
+import { PageSkeleton } from "@/components/skeleton";
+export default function Loading() {
+  return <PageSkeleton />;
+}

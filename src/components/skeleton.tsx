@@ -1,18 +1,272 @@
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 
-function LoadingFrame({label,children,className=""}:{label:string;children:ReactNode;className?:string}){
-  return <div className={`skeleton-frame ${className}`} role="status" aria-label={label}><span className="sr-only">{label}</span><div aria-hidden="true">{children}</div></div>;
+function LoadingFrame({
+  label,
+  children,
+  className = "",
+}: Readonly<{
+  label: string;
+  children: ReactNode;
+  className?: string;
+}>) {
+  return (
+    <div className={`skeleton-frame ${className}`} role="status" aria-label={label}>
+      <span className="sr-only">{label}</span>
+      <div aria-hidden="true">{children}</div>
+    </div>
+  );
 }
-function Bar({className=""}:{className?:string}){return <span className={`skeleton-block ${className}`}/>;}
-export function SummarySkeleton(){return <div className="skeleton-summary" aria-hidden="true">{Array.from({length:4},(_,i)=><div key={i}><Bar className="skeleton-label"/><Bar className="skeleton-number"/></div>)}</div>;}
-export function TableSkeleton({label="Memuat daftar feedback",columns=5}:{label?:string;columns?:number}){
-  return <LoadingFrame label={label} className="table-skeleton"><div className="skeleton-table-head" style={{gridTemplateColumns:`minmax(0,2fr) repeat(${columns-1}, minmax(0,1fr))`}}>{Array.from({length:columns},(_,i)=><Bar key={i} className="skeleton-label"/>)}</div>{Array.from({length:5},(_,row)=><div key={row} className="skeleton-table-row" style={{gridTemplateColumns:`minmax(0,2fr) repeat(${columns-1}, minmax(0,1fr))`}}><div className="skeleton-message"><Bar className={row%2?"skeleton-wide":"skeleton-medium"}/><Bar className="skeleton-short"/></div>{Array.from({length:columns-1},(_,i)=><Bar key={i} className="skeleton-label"/>)}</div>)}<div className="skeleton-table-footer"><Bar className="skeleton-medium"/><Bar className="skeleton-control"/></div></LoadingFrame>;
+function Bar({ className = "" }: Readonly<{ className?: string }>) {
+  return <span className={`skeleton-block ${className}`} />;
 }
-export function ChartSkeleton({label="Memuat grafik feedback",height=270,summary=false}:{label?:string;height?:number;summary?:boolean}){
-  return <LoadingFrame label={label} className="chart-skeleton">{summary&&<div className="skeleton-summary">{Array.from({length:4},(_,i)=><div key={i}><Bar className="skeleton-label"/><Bar className="skeleton-number"/></div>)}</div>}<div className="skeleton-plot" style={{height}}><Bar className="skeleton-axis"/><div className="skeleton-plot-body"><Bar className="skeleton-plot-area"/><div className="skeleton-months">{Array.from({length:6},(_,i)=><Bar key={i} className="skeleton-tick"/>)}</div><div className="skeleton-legend"><Bar className="skeleton-label"/><Bar className="skeleton-label"/><Bar className="skeleton-label"/></div></div></div></LoadingFrame>;
+export function SummarySkeleton() {
+  return (
+    <div className="skeleton-summary" aria-hidden="true">
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i}>
+          <Bar className="skeleton-label" />
+          <Bar className="skeleton-number" />
+        </div>
+      ))}
+    </div>
+  );
 }
-export function DetailSkeleton(){return <LoadingFrame label="Memuat detail feedback" className="detail-panel detail-skeleton"><div className="skeleton-detail-header"><div><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/></div><Bar className="skeleton-control"/></div><div className="skeleton-paragraph"><Bar/><Bar/><Bar className="skeleton-medium"/></div><Bar className="skeleton-disclosure"/><Bar className="skeleton-disclosure"/><div className="skeleton-notes"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/><Bar className="skeleton-textarea"/><Bar className="skeleton-button"/></div></LoadingFrame>;}
-export function SettingsSkeleton(){return <LoadingFrame label="Memuat pengaturan website" className="settings-skeleton"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/><div className="settings-grid"><div className="settings-panel"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/><Bar className="skeleton-code"/><Bar className="skeleton-button"/><div className="skeleton-fields">{Array.from({length:3},(_,i)=><div key={i}><Bar className="skeleton-label"/><Bar className="skeleton-input"/></div>)}</div></div><div className="settings-preview"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/><Bar className="skeleton-preview"/></div></div></LoadingFrame>;}
-export function InboxPageSkeleton(){return <div className="inbox-page-skeleton"><LoadingFrame label="Memuat halaman feedback"><div className="skeleton-page-heading"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/></div></LoadingFrame><div className="feedback-analytics platform-panel"><div className="skeleton-toolbar"><Bar className="skeleton-heading"/><Bar className="skeleton-control"/></div><ChartSkeleton summary/></div><div className="table-panel"><div className="skeleton-toolbar"><Bar className="skeleton-input"/><Bar className="skeleton-button"/></div><TableSkeleton/></div></div>;}
-export function WebsitePageSkeleton(){return <><LoadingFrame label="Loading website page"><div className="skeleton-page-heading"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/></div></LoadingFrame><div className="websites-layout"><div className="websites-list-column"><section className="platform-panel"><TableSkeleton label="Loading websites" columns={4}/></section></div><LoadingFrame label="Loading Add website form" className="platform-panel websites-form-placeholder"><Bar className="skeleton-heading"/><div className="skeleton-fields"><div><Bar className="skeleton-label"/><Bar className="skeleton-input"/></div><div><Bar className="skeleton-label"/><Bar className="skeleton-input"/></div></div><Bar className="skeleton-button"/></LoadingFrame></div></>;}
-export function PageSkeleton({label="Loading platform data",overview=false}:{label?:string;overview?:boolean}){return <LoadingFrame label={label} className="page-skeleton"><div className="skeleton-page-heading"><Bar className="skeleton-heading"/><Bar className="skeleton-medium"/></div>{overview&&<><div className="skeleton-summary">{Array.from({length:5},(_,i)=><div key={i}><Bar className="skeleton-label"/><Bar className="skeleton-number"/></div>)}</div><div className="overview-charts"><div className="platform-panel"><ChartSkeleton label="Chart placeholder" height={240}/></div><div className="platform-panel"><ChartSkeleton label="Chart placeholder" height={240}/></div></div></>}<div className="platform-panel"><div className="skeleton-toolbar"><Bar className="skeleton-input"/><Bar className="skeleton-button"/></div><TableSkeleton label="Table placeholder"/></div></LoadingFrame>;}
+export function TableSkeleton({
+  label = "Memuat daftar feedback",
+  columns = 5,
+}: Readonly<{
+  label?: string;
+  columns?: number;
+}>) {
+  return (
+    <LoadingFrame label={label} className="table-skeleton">
+      <div
+        className="skeleton-table-head"
+        style={{ gridTemplateColumns: `minmax(0,2fr) repeat(${columns - 1}, minmax(0,1fr))` }}
+      >
+        {Array.from({ length: columns }, (_, i) => (
+          <Bar key={i} className="skeleton-label" />
+        ))}
+      </div>
+      {Array.from({ length: 5 }, (_, row) => (
+        <div
+          key={row}
+          className="skeleton-table-row"
+          style={{ gridTemplateColumns: `minmax(0,2fr) repeat(${columns - 1}, minmax(0,1fr))` }}
+        >
+          <div className="skeleton-message">
+            <Bar className={row % 2 ? "skeleton-wide" : "skeleton-medium"} />
+            <Bar className="skeleton-short" />
+          </div>
+          {Array.from({ length: columns - 1 }, (_, i) => (
+            <Bar key={i} className="skeleton-label" />
+          ))}
+        </div>
+      ))}
+      <div className="skeleton-table-footer">
+        <Bar className="skeleton-medium" />
+        <Bar className="skeleton-control" />
+      </div>
+    </LoadingFrame>
+  );
+}
+export function ChartSkeleton({
+  label = "Memuat grafik feedback",
+  height = 270,
+  summary = false,
+}: Readonly<{
+  label?: string;
+  height?: number;
+  summary?: boolean;
+}>) {
+  return (
+    <LoadingFrame label={label} className="chart-skeleton">
+      {summary && (
+        <div className="skeleton-summary">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i}>
+              <Bar className="skeleton-label" />
+              <Bar className="skeleton-number" />
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="skeleton-plot" style={{ height }}>
+        <Bar className="skeleton-axis" />
+        <div className="skeleton-plot-body">
+          <Bar className="skeleton-plot-area" />
+          <div className="skeleton-months">
+            {Array.from({ length: 6 }, (_, i) => (
+              <Bar key={i} className="skeleton-tick" />
+            ))}
+          </div>
+          <div className="skeleton-legend">
+            <Bar className="skeleton-label" />
+            <Bar className="skeleton-label" />
+            <Bar className="skeleton-label" />
+          </div>
+        </div>
+      </div>
+    </LoadingFrame>
+  );
+}
+export function DetailSkeleton() {
+  return (
+    <LoadingFrame label="Memuat detail feedback" className="detail-panel detail-skeleton">
+      <div className="skeleton-detail-header">
+        <div>
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-medium" />
+        </div>
+        <Bar className="skeleton-control" />
+      </div>
+      <div className="skeleton-paragraph">
+        <Bar />
+        <Bar />
+        <Bar className="skeleton-medium" />
+      </div>
+      <Bar className="skeleton-disclosure" />
+      <Bar className="skeleton-disclosure" />
+      <div className="skeleton-notes">
+        <Bar className="skeleton-heading" />
+        <Bar className="skeleton-medium" />
+        <Bar className="skeleton-textarea" />
+        <Bar className="skeleton-button" />
+      </div>
+    </LoadingFrame>
+  );
+}
+export function SettingsSkeleton() {
+  return (
+    <LoadingFrame label="Memuat pengaturan website" className="settings-skeleton">
+      <Bar className="skeleton-heading" />
+      <Bar className="skeleton-medium" />
+      <div className="settings-grid">
+        <div className="settings-panel">
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-medium" />
+          <Bar className="skeleton-code" />
+          <Bar className="skeleton-button" />
+          <div className="skeleton-fields">
+            {Array.from({ length: 3 }, (_, i) => (
+              <div key={i}>
+                <Bar className="skeleton-label" />
+                <Bar className="skeleton-input" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="settings-preview">
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-medium" />
+          <Bar className="skeleton-preview" />
+        </div>
+      </div>
+    </LoadingFrame>
+  );
+}
+export function InboxPageSkeleton() {
+  return (
+    <div className="inbox-page-skeleton">
+      <LoadingFrame label="Memuat halaman feedback">
+        <div className="skeleton-page-heading">
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-medium" />
+        </div>
+      </LoadingFrame>
+      <div className="feedback-analytics platform-panel">
+        <div className="skeleton-toolbar">
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-control" />
+        </div>
+        <ChartSkeleton summary />
+      </div>
+      <div className="table-panel">
+        <div className="skeleton-toolbar">
+          <Bar className="skeleton-input" />
+          <Bar className="skeleton-button" />
+        </div>
+        <TableSkeleton />
+      </div>
+    </div>
+  );
+}
+export function WebsitePageSkeleton() {
+  return (
+    <>
+      <LoadingFrame label="Loading website page">
+        <div className="skeleton-page-heading">
+          <Bar className="skeleton-heading" />
+          <Bar className="skeleton-medium" />
+        </div>
+      </LoadingFrame>
+      <div className="websites-layout">
+        <div className="websites-list-column">
+          <section className="platform-panel">
+            <TableSkeleton label="Loading websites" columns={4} />
+          </section>
+        </div>
+        <LoadingFrame
+          label="Loading Add website form"
+          className="platform-panel websites-form-placeholder"
+        >
+          <Bar className="skeleton-heading" />
+          <div className="skeleton-fields">
+            <div>
+              <Bar className="skeleton-label" />
+              <Bar className="skeleton-input" />
+            </div>
+            <div>
+              <Bar className="skeleton-label" />
+              <Bar className="skeleton-input" />
+            </div>
+          </div>
+          <Bar className="skeleton-button" />
+        </LoadingFrame>
+      </div>
+    </>
+  );
+}
+export function PageSkeleton({
+  label = "Loading platform data",
+  overview = false,
+}: Readonly<{
+  label?: string;
+  overview?: boolean;
+}>) {
+  return (
+    <LoadingFrame label={label} className="page-skeleton">
+      <div className="skeleton-page-heading">
+        <Bar className="skeleton-heading" />
+        <Bar className="skeleton-medium" />
+      </div>
+      {overview && (
+        <>
+          <div className="skeleton-summary">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i}>
+                <Bar className="skeleton-label" />
+                <Bar className="skeleton-number" />
+              </div>
+            ))}
+          </div>
+          <div className="overview-charts">
+            <div className="platform-panel">
+              <ChartSkeleton label="Chart placeholder" height={240} />
+            </div>
+            <div className="platform-panel">
+              <ChartSkeleton label="Chart placeholder" height={240} />
+            </div>
+          </div>
+        </>
+      )}
+      <div className="platform-panel">
+        <div className="skeleton-toolbar">
+          <Bar className="skeleton-input" />
+          <Bar className="skeleton-button" />
+        </div>
+        <TableSkeleton label="Table placeholder" />
+      </div>
+    </LoadingFrame>
+  );
+}

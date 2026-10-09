@@ -4,17 +4,30 @@ import { companyDatabase, seedCompanies } from "../support/company-database";
 import { seedDemoData } from "../../scripts/demo-data";
 import { enableDemoLogin } from "../../scripts/demo-login";
 let fixture: Awaited<ReturnType<typeof companyDatabase>>;
-beforeAll(async () => { fixture = await companyDatabase(); await seedCompanies(fixture.db); await seedDemoData(fixture.db, "platform", new Date()); });
-afterAll(async () => { await fixture?.close(); });
+beforeAll(async () => {
+  fixture = await companyDatabase();
+  await seedCompanies(fixture.db);
+  await seedDemoData(fixture.db, "platform", new Date());
+});
+afterAll(async () => {
+  await fixture?.close();
+});
 it("enables only namespaced demo identity without escalating role or resetting existing password", async () => {
   const password = "Demo-only-password-2026!";
   const result = await enableDemoLogin(fixture.db, "platform", password);
   expect(result).toEqual({ created: true, email: "admin@northstar.example.test" });
   const user = await fixture.db.user.findUniqueOrThrow({ where: { email: result.email } });
-  expect(user.platformRole).toBe("USER"); expect(user.emailVerified).toBe(true);
-  const account = await fixture.db.account.findFirstOrThrow({ where: { userId: user.id, providerId: "credential" } });
+  expect(user.platformRole).toBe("USER");
+  expect(user.emailVerified).toBe(true);
+  const account = await fixture.db.account.findFirstOrThrow({
+    where: { userId: user.id, providerId: "credential" },
+  });
   expect(await verifyPassword({ hash: account.password!, password })).toBe(true);
-  expect((await enableDemoLogin(fixture.db, "platform", "Different-password-2026!")).created).toBe(false);
-  expect((await fixture.db.account.findUniqueOrThrow({ where: { id: account.id } })).password).toBe(account.password);
+  expect((await enableDemoLogin(fixture.db, "platform", "Different-password-2026!")).created).toBe(
+    false,
+  );
+  expect((await fixture.db.account.findUniqueOrThrow({ where: { id: account.id } })).password).toBe(
+    account.password,
+  );
   await expect(enableDemoLogin(fixture.db, "alice", password)).rejects.toThrow(/platform owner/i);
 });

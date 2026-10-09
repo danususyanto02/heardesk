@@ -38,13 +38,13 @@ Modules: identity, companies, websites, feedback, usage, platform. Add a module 
 
 ## Pragmatic SOLID
 
-| Principle | Rule |
-| --- | --- |
-| SRP | Split code when responsibilities have different reasons to change; keep one use case per coherent action |
-| OCP | Replace external adapters through stable ports; avoid speculative plugin frameworks |
-| LSP | Fake and production ports share missing-resource, Company-scope, and transaction contracts |
-| ISP | Prefer focused FeedbackReader/FeedbackWriter/EmailSender contracts to a giant generic repository |
-| DIP | Inner use cases depend on business contracts; infrastructure satisfies those contracts |
+| Principle | Rule                                                                                                     |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| SRP       | Split code when responsibilities have different reasons to change; keep one use case per coherent action |
+| OCP       | Replace external adapters through stable ports; avoid speculative plugin frameworks                      |
+| LSP       | Fake and production ports share missing-resource, Company-scope, and transaction contracts               |
+| ISP       | Prefer focused FeedbackReader/FeedbackWriter/EmailSender contracts to a giant generic repository         |
+| DIP       | Inner use cases depend on business contracts; infrastructure satisfies those contracts                   |
 
 Functions/plain objects are valid implementations. Classes are optional. No IoC container, generic BaseRepository, universal entity framework, or interface for a trivial pure helper by default. DRY must not collapse distinct authorization rules into an unsafe generic shortcut.
 

@@ -1,27 +1,424 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
-import {DownloadSimple,X} from "@phosphor-icons/react";
-import {api} from "@/lib/api";
-import type {FeedbackStatistics,FeedbackPeriod} from "@/modules/feedback/domain/statistics";
-import {ChartSkeleton,SummarySkeleton} from "./skeleton";
+import { useEffect, useRef, useState } from "react";
+import { DownloadSimple, X } from "@phosphor-icons/react";
+import { api } from "@/lib/api";
+import type { FeedbackStatistics, FeedbackPeriod } from "@/modules/feedback/domain/statistics";
+import { ChartSkeleton, SummarySkeleton } from "./skeleton";
+import styles from "./inbox-statistics.module.css";
 
-const monthNames=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-export function InboxStatistics({companyId,siteId,websites}:{companyId:string;siteId?:string;websites:readonly {id:number;name:string}[]}){
-  const currentYear=new Date().getUTCFullYear(),[year,setYear]=useState(currentYear),[data,setData]=useState<FeedbackStatistics|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[retry,setRetry]=useState(0);
-  const chart=useRef<HTMLDivElement>(null),dialog=useRef<HTMLDialogElement>(null);
-  const [chartReady,setChartReady]=useState(false);
-  const [period,setPeriod]=useState<FeedbackPeriod>("annual"),[exportYear,setExportYear]=useState(currentYear),[month,setMonth]=useState(new Date().getUTCMonth()+1),[exportSite,setExportSite]=useState(""),[exportBusy,setExportBusy]=useState(false),[exportError,setExportError]=useState("");
-  useEffect(()=>{let active=true;setLoading(true);setChartReady(false);setError("");setData(null);const query=new URLSearchParams({period:"annual",year:String(year)});if(siteId)query.set("siteId",siteId);api<FeedbackStatistics>(`/api/companies/${companyId}/feedback/statistics?${query}`).then(result=>{if(active)setData(result);}).catch(cause=>{if(active)setError(cause.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[companyId,siteId,year,retry]);
-  useEffect(()=>{let active=true;setChartReady(false);let instance:{destroy():void;setSize(width:number,height:number,animation:boolean):void}|undefined,observer:ResizeObserver|undefined;async function render(){if(!data||loading)return;const Highcharts=(await import("highcharts")).default;await import("highcharts/modules/accessibility");if(!active||!chart.current)return;const styles=getComputedStyle(document.documentElement),container=chart.current;const width=()=>Math.max(200,container.clientWidth-32);instance=Highcharts.chart(container,{chart:{type:"line",height:270,width:width(),animation:false,style:{fontFamily:"Source Sans 3"}},title:{text:undefined},credits:{enabled:true},xAxis:{categories:monthNames.map(name=>name.slice(0,3))},yAxis:{title:{text:"Jumlah feedback"},allowDecimals:false,min:0},tooltip:{shared:true},legend:{itemDistance:12},plotOptions:{line:{animation:false,marker:{enabled:true,radius:3}}},series:[{type:"line",name:"Masalah",data:data.rows.map(row=>row.issues),color:styles.getPropertyValue("--blue").trim(),dashStyle:"Solid"},{type:"line",name:"Saran",data:data.rows.map(row=>row.suggestions),color:styles.getPropertyValue("--text").trim(),dashStyle:"ShortDash"},{type:"line",name:"Pujian",data:data.rows.map(row=>row.compliments),color:styles.getPropertyValue("--muted").trim(),dashStyle:"Dot"}],accessibility:{description:`Jumlah feedback per bulan tahun ${year} untuk ${data.websiteName}. Semua status termasuk diarsipkan.`}});observer=new ResizeObserver(()=>instance?.setSize(width(),270,false));observer.observe(container);if(active)setChartReady(true);}void render().catch(()=>{if(active)setError("Grafik tidak dapat ditampilkan. Rekap angka tetap tersedia.");});return()=>{active=false;observer?.disconnect();instance?.destroy();};},[data,loading,year]);
-  async function download(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setExportBusy(true);setExportError("");try{const query=new URLSearchParams({period});if(period!=="all")query.set("year",String(exportYear));if(period==="monthly")query.set("month",String(month));if(exportSite)query.set("siteId",exportSite);const response=await fetch(`/api/companies/${companyId}/feedback/export?${query}`,{cache:"no-store"});if(!response.ok){const result=await response.json();throw new Error(result.error?.message??"Ekspor gagal. Coba lagi.");}const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=`heardesk-feedback-${period}-${period==="all"?"semua":exportYear}${period==="monthly"?"-"+String(month).padStart(2,"0"):""}.xlsx`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);dialog.current?.close();}catch(cause){setExportError((cause as Error).message);}finally{setExportBusy(false);}}
-  const years=[...new Set([year,...(data?.years??[currentYear])])].sort((a,b)=>b-a);
-  return <section className="feedback-analytics platform-panel" aria-labelledby="feedback-chart-heading"><header className="analytics-header"><div><h2 id="feedback-chart-heading">Feedback per bulan</h2><p className="helper">{data?.websiteName??"Company"} · Semua status · UTC</p></div><div className="analytics-actions"><label className="compact-year">Tahun<select aria-label="Tahun grafik" value={year} onChange={event=>setYear(Number(event.target.value))}>{years.map(value=><option key={value} value={value}>{value}</option>)}</select></label><button className="btn" disabled={loading||!data} onClick={()=>{setPeriod("annual");setExportYear(year);setExportSite(siteId??"");setExportError("");dialog.current?.showModal();}}><DownloadSimple size={18} aria-hidden/>Export Excel</button></div></header>
-    {error&&!loading?<div className="analytics-state"><p className="error" role="alert">{error}</p><button className="btn" onClick={()=>setRetry(value=>value+1)}>Coba lagi statistik</button></div>:null}
-    {loading&&<SummarySkeleton/>}
-    {data&&<><dl className="analytics-totals">{[["Masalah",data.totals.issues],["Saran",data.totals.suggestions],["Pujian",data.totals.compliments],["Total",data.totals.total]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>{!data.totals.total&&<p className="helper analytics-empty">Belum ada feedback pada tahun ini. Bulan tanpa laporan ditampilkan sebagai nol.</p>}</>}
-    <div className="chart-loading-stage">{!error&&(loading||!chartReady)&&<div className="chart-skeleton-overlay"><ChartSkeleton label="Memuat grafik feedback"/></div>}<div ref={chart} className="inbox-line-chart" style={{visibility:chartReady?"visible":"hidden"}} aria-hidden={!chartReady} aria-busy={(loading||!chartReady)&&!error}/></div>
-    <p className="analytics-scope helper">Grafik mengikuti tahun dan website. Pencarian serta status pada tabel tidak mengubah rekap ini.</p>
-    {data&&<details className="analytics-data"><summary>Lihat rekap angka</summary><div className="analytics-table-scroll"><table><thead><tr><th>Bulan</th><th>Masalah</th><th>Saran</th><th>Pujian</th><th>Total</th></tr></thead><tbody>{data.rows.map((row,index)=><tr key={row.label}><td>{monthNames[index]}</td><td>{row.issues}</td><td>{row.suggestions}</td><td>{row.compliments}</td><td>{row.total}</td></tr>)}</tbody></table></div></details>}
-    <dialog ref={dialog} className="key-confirm feedback-export-dialog" aria-labelledby="export-heading" onCancel={event=>{if(exportBusy)event.preventDefault();}}><header><h2 id="export-heading">Export jumlah feedback</h2><button type="button" className="btn quiet icon-btn" aria-label="Tutup ekspor" disabled={exportBusy} onClick={()=>dialog.current?.close()}><X aria-hidden/></button></header><p className="helper">Unduh rekap angka seluruh periode, bukan hanya halaman tabel yang terbuka.</p><form className="form-stack" onSubmit={download}><label>Periode ekspor<select value={period} disabled={exportBusy} onChange={event=>setPeriod(event.target.value as FeedbackPeriod)}><option value="monthly">Bulanan</option><option value="annual">Tahunan</option><option value="all">Semua periode</option></select></label>{period!=="all"&&<label>Tahun ekspor<input type="number" min={1900} max={9998} required value={exportYear} disabled={exportBusy} onChange={event=>setExportYear(Number(event.target.value))}/></label>}{period==="monthly"&&<label>Bulan ekspor<select value={month} disabled={exportBusy} onChange={event=>setMonth(Number(event.target.value))}>{monthNames.map((name,index)=><option key={name} value={index+1}>{name}</option>)}</select></label>}<label>Website ekspor<select value={exportSite} disabled={exportBusy} onChange={event=>setExportSite(event.target.value)}><option value="">Semua website</option>{websites.map(site=><option key={site.id} value={site.id}>{site.name}</option>)}</select></label><p className="helper">{period==="monthly"?"Rekap per hari dan total bulanan.":period==="annual"?"Rekap Januari–Desember dan total tahunan.":"Rekap per bulan/tahun sejak feedback pertama sampai bulan berjalan."} Tanggal menggunakan UTC.</p>{exportError&&<p className="error" role="alert">{exportError}</p>}<div className="key-actions"><button type="button" className="btn" disabled={exportBusy} onClick={()=>dialog.current?.close()}>Batal</button><button className="btn primary" disabled={exportBusy}>{exportBusy?"Menyiapkan Excel…":"Download Excel"}</button></div></form></dialog>
-  </section>;
+const monthNames = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+const exportDescriptions: Record<FeedbackPeriod, string> = {
+  monthly: "Rekap per hari dan total bulanan.",
+  annual: "Rekap Januari–Desember dan total tahunan.",
+  all: "Rekap per bulan/tahun sejak feedback pertama sampai bulan berjalan.",
+};
+export function InboxStatistics({
+  companyId,
+  siteId,
+  websites,
+}: Readonly<{
+  companyId: string;
+  siteId?: string;
+  websites: readonly { id: number; name: string }[];
+}>) {
+  const currentYear = new Date().getUTCFullYear();
+  const [year, setYear] = useState(currentYear);
+  const [data, setData] = useState<FeedbackStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const chart = useRef<HTMLDivElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [chartReady, setChartReady] = useState(false);
+  const [period, setPeriod] = useState<FeedbackPeriod>("annual");
+  const [exportYear, setExportYear] = useState(currentYear);
+  const [month, setMonth] = useState(new Date().getUTCMonth() + 1);
+  const [exportSite, setExportSite] = useState("");
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState("");
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setChartReady(false);
+    setError("");
+    setData(null);
+    const query = new URLSearchParams({ period: "annual", year: String(year) });
+    if (siteId) {
+      query.set("siteId", siteId);
+    }
+    api<FeedbackStatistics>(`/api/companies/${companyId}/feedback/statistics?${query}`)
+      .then((result) => {
+        if (active) {
+          setData(result);
+        }
+      })
+      .catch((cause) => {
+        if (active) {
+          setError(cause.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [companyId, siteId, year, retry]);
+  useEffect(() => {
+    let active = true;
+    setChartReady(false);
+    let instance:
+      | { destroy(): void; setSize(width: number, height: number, animation: boolean): void }
+      | undefined;
+    let observer: ResizeObserver | undefined;
+    async function render() {
+      if (!data || loading) {
+        return;
+      }
+      const Highcharts = (await import("highcharts")).default;
+      await import("highcharts/modules/accessibility");
+      if (!active || !chart.current) {
+        return;
+      }
+      const styles = getComputedStyle(document.documentElement);
+      const container = chart.current;
+      const width = () => Math.max(200, container.clientWidth - 32);
+      instance = Highcharts.chart(container, {
+        chart: {
+          type: "line",
+          height: 270,
+          width: width(),
+          animation: false,
+          style: { fontFamily: "Source Sans 3" },
+        },
+        title: { text: undefined },
+        credits: { enabled: true },
+        xAxis: { categories: monthNames.map((name) => name.slice(0, 3)) },
+        yAxis: { title: { text: "Jumlah feedback" }, allowDecimals: false, min: 0 },
+        tooltip: { shared: true },
+        legend: { itemDistance: 12 },
+        plotOptions: { line: { animation: false, marker: { enabled: true, radius: 3 } } },
+        series: [
+          {
+            type: "line",
+            name: "Masalah",
+            data: data.rows.map((row) => row.issues),
+            color: styles.getPropertyValue("--blue").trim(),
+            dashStyle: "Solid",
+          },
+          {
+            type: "line",
+            name: "Saran",
+            data: data.rows.map((row) => row.suggestions),
+            color: styles.getPropertyValue("--text").trim(),
+            dashStyle: "ShortDash",
+          },
+          {
+            type: "line",
+            name: "Pujian",
+            data: data.rows.map((row) => row.compliments),
+            color: styles.getPropertyValue("--muted").trim(),
+            dashStyle: "Dot",
+          },
+        ],
+        accessibility: {
+          description: `Jumlah feedback per bulan tahun ${year} untuk ${data.websiteName}. Semua status termasuk diarsipkan.`,
+        },
+      });
+      observer = new ResizeObserver(() => instance?.setSize(width(), 270, false));
+      observer.observe(container);
+      if (active) {
+        setChartReady(true);
+      }
+    }
+    void render().catch(() => {
+      if (active) {
+        setError("Grafik tidak dapat ditampilkan. Rekap angka tetap tersedia.");
+      }
+    });
+    return () => {
+      active = false;
+      observer?.disconnect();
+      instance?.destroy();
+    };
+  }, [data, loading, year]);
+  async function download(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setExportBusy(true);
+    setExportError("");
+    try {
+      const query = new URLSearchParams({ period });
+      if (period !== "all") {
+        query.set("year", String(exportYear));
+      }
+      if (period === "monthly") {
+        query.set("month", String(month));
+      }
+      if (exportSite) {
+        query.set("siteId", exportSite);
+      }
+      const response = await fetch(`/api/companies/${companyId}/feedback/export?${query}`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error?.message ?? "Ekspor gagal. Coba lagi.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `heardesk-feedback-${period}-${period === "all" ? "semua" : exportYear}${period === "monthly" ? "-" + String(month).padStart(2, "0") : ""}.xlsx`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      dialog.current?.close();
+    } catch (cause) {
+      setExportError((cause as Error).message);
+    } finally {
+      setExportBusy(false);
+    }
+  }
+  const years = [...new Set([year, ...(data?.years ?? [currentYear])])].sort((a, b) => b - a);
+  return (
+    <section className="feedback-analytics platform-panel" aria-labelledby="feedback-chart-heading">
+      <header className={styles.header} data-testid="analytics-heading">
+        <div className={styles.heading}>
+          <h2 id="feedback-chart-heading">Feedback per bulan</h2>
+          <p className="helper">{data?.websiteName ?? "Company"} · Semua status · UTC</p>
+        </div>
+        <button
+          type="button"
+          className="btn"
+          disabled={loading || !data}
+          onClick={() => {
+            setPeriod("annual");
+            setExportYear(year);
+            setExportSite(siteId ?? "");
+            setExportError("");
+            dialog.current?.showModal();
+          }}
+        >
+          <DownloadSimple size={18} aria-hidden />
+          Export Excel
+        </button>
+      </header>
+      <div className={styles.summary} data-testid="analytics-summary">
+        <label className={styles.year}>
+          Tahun
+          <select
+            aria-label="Tahun grafik"
+            value={year}
+            onChange={(event) => setYear(Number(event.target.value))}
+          >
+            {years.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+        {loading && <SummarySkeleton />}
+        {!loading && data && (
+          <dl className={styles.totals}>
+            {[
+              ["Masalah", data.totals.issues],
+              ["Saran", data.totals.suggestions],
+              ["Pujian", data.totals.compliments],
+              ["Total", data.totals.total],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+      {error && !loading ? (
+        <div className="analytics-state">
+          <p className="error" role="alert">
+            {error}
+          </p>
+          <button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>
+            Coba lagi statistik
+          </button>
+        </div>
+      ) : null}
+      {data && !data.totals.total && (
+        <p className="helper analytics-empty">
+          Belum ada feedback pada tahun ini. Bulan tanpa laporan ditampilkan sebagai nol.
+        </p>
+      )}
+      <div className={styles.chart}>
+        <div className="chart-loading-stage">
+          {!error && (loading || !chartReady) && (
+            <div className="chart-skeleton-overlay">
+              <ChartSkeleton label="Memuat grafik feedback" />
+            </div>
+          )}
+          <div
+            ref={chart}
+            className="inbox-line-chart"
+            style={{ visibility: chartReady ? "visible" : "hidden" }}
+            aria-hidden={!chartReady}
+            aria-busy={(loading || !chartReady) && !error}
+          />
+        </div>
+      </div>
+      <p className={`${styles.scope} helper`}>
+        Grafik mengikuti tahun dan website. Pencarian serta status pada tabel tidak mengubah rekap
+        ini.
+      </p>
+      {data && (
+        <details className={styles.details}>
+          <summary>Lihat rekap angka</summary>
+          <div className="analytics-table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bulan</th>
+                  <th>Masalah</th>
+                  <th>Saran</th>
+                  <th>Pujian</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.rows.map((row, index) => (
+                  <tr key={row.label}>
+                    <td>{monthNames[index]}</td>
+                    <td>{row.issues}</td>
+                    <td>{row.suggestions}</td>
+                    <td>{row.compliments}</td>
+                    <td>{row.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+      <dialog
+        ref={dialog}
+        className="key-confirm feedback-export-dialog"
+        aria-labelledby="export-heading"
+        onCancel={(event) => {
+          if (exportBusy) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <header>
+          <h2 id="export-heading">Export jumlah feedback</h2>
+          <button
+            type="button"
+            className="btn quiet icon-btn"
+            aria-label="Tutup ekspor"
+            disabled={exportBusy}
+            onClick={() => dialog.current?.close()}
+          >
+            <X aria-hidden />
+          </button>
+        </header>
+        <p className="helper">
+          Unduh rekap angka seluruh periode, bukan hanya halaman tabel yang terbuka.
+        </p>
+        <form className="form-stack" onSubmit={download}>
+          <label>
+            Periode ekspor
+            <select
+              value={period}
+              disabled={exportBusy}
+              onChange={(event) => setPeriod(event.target.value as FeedbackPeriod)}
+            >
+              <option value="monthly">Bulanan</option>
+              <option value="annual">Tahunan</option>
+              <option value="all">Semua periode</option>
+            </select>
+          </label>
+          {period !== "all" && (
+            <label>
+              Tahun ekspor
+              <input
+                type="number"
+                min={1900}
+                max={9998}
+                required
+                value={exportYear}
+                disabled={exportBusy}
+                onChange={(event) => setExportYear(Number(event.target.value))}
+              />
+            </label>
+          )}
+          {period === "monthly" && (
+            <label>
+              Bulan ekspor
+              <select
+                value={month}
+                disabled={exportBusy}
+                onChange={(event) => setMonth(Number(event.target.value))}
+              >
+                {monthNames.map((name, index) => (
+                  <option key={name} value={index + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label>
+            Website ekspor
+            <select
+              value={exportSite}
+              disabled={exportBusy}
+              onChange={(event) => setExportSite(event.target.value)}
+            >
+              <option value="">Semua website</option>
+              {websites.map((site) => (
+                <option key={site.id} value={site.id}>
+                  {site.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="helper">{exportDescriptions[period]} Tanggal menggunakan UTC.</p>
+          {exportError && (
+            <p className="error" role="alert">
+              {exportError}
+            </p>
+          )}
+          <div className="key-actions">
+            <button
+              type="button"
+              className="btn"
+              disabled={exportBusy}
+              onClick={() => dialog.current?.close()}
+            >
+              Batal
+            </button>
+            <button type="submit" className="btn primary" disabled={exportBusy}>
+              {exportBusy ? "Menyiapkan Excel…" : "Download Excel"}
+            </button>
+          </div>
+        </form>
+      </dialog>
+    </section>
+  );
 }

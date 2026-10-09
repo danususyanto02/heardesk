@@ -16,26 +16,37 @@ describe("Clean Architecture imports", () => {
     'import { getServices } from "@/server/composition/company-services";',
     'import { x } from "../../identity/infrastructure/auth";',
   ]) {
-    it(`rejects forbidden edge: ${source}`, () => expect(architectureViolations(file, source, root)).not.toHaveLength(0));
+    it(`rejects forbidden edge: ${source}`, () =>
+      expect(architectureViolations(file, source, root)).not.toHaveLength(0));
   }
   it("allows pure cross-module domain ports and ignores strings/comments", () => {
-    const source = 'import type { Actor } from "../../identity/domain/session"; const example = "require(\\\"sharp\\\")"; // import x from "next"';
+    const source =
+      'import type { Actor } from "../../identity/domain/session"; const example = "require(\\\"sharp\\\")"; // import x from "next"';
     expect(architectureViolations(file, source, root)).toEqual([]);
   });
   it("rejects unresolved external aliases and computed imports", () => {
     expect(architectureViolations(file, 'import x from "custom/db";', root)).not.toHaveLength(0);
-    expect(architectureViolations(file, 'await import(moduleName);', root)).not.toHaveLength(0);
+    expect(architectureViolations(file, "await import(moduleName);", root)).not.toHaveLength(0);
   });
   it("domain cannot depend on application even by a same-module relative import", () => {
-    expect(architectureViolations(path.join(root, "modules/companies/domain/access.ts"), 'import { authorize } from "../application/authorize-company";', root)).not.toHaveLength(0);
+    expect(
+      architectureViolations(
+        path.join(root, "modules/companies/domain/access.ts"),
+        'import { authorize } from "../application/authorize-company";',
+        root,
+      ),
+    ).not.toHaveLength(0);
   });
   it("enforces boundaries on every actual domain/application file", () => {
     const violations: string[] = [];
     function visit(directory: string) {
       for (const item of readdirSync(directory, { withFileTypes: true })) {
         const full = path.join(directory, item.name);
-        if (item.isDirectory()) visit(full);
-        else if (/\.[cm]?tsx?$/.test(item.name) && /[\\/](domain|application)[\\/]/.test(full)) violations.push(...architectureViolations(full, readFileSync(full, "utf8"), root));
+        if (item.isDirectory()) {
+          visit(full);
+        } else if (/\.[cm]?tsx?$/.test(item.name) && /[\\/](domain|application)[\\/]/.test(full)) {
+          violations.push(...architectureViolations(full, readFileSync(full, "utf8"), root));
+        }
       }
     }
     visit(path.join(root, "modules"));

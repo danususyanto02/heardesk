@@ -1,7 +1,58 @@
 import { platformServices } from "@/server/platform-access";
 import { platformQuery } from "@/server/platform-query";
 import { PlatformSearch, PlatformPagination } from "@/components/platform-data";
-export default async function Audit({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const query = platformQuery(await searchParams), data = await platformServices().audit(query);
-  return <><div className="page-heading"><div><h1>Audit Log</h1><p className="muted">Administrative events are recorded when their changes commit.</p></div></div><section className="platform-panel"><PlatformSearch query={query} placeholder="Search action or Company"/>{data.items.length ? <div className="platform-table-wrap"><table className="platform-table"><thead><tr><th>Action / Company</th><th>Reason</th><th>Actor ID</th><th>Time (UTC)</th></tr></thead><tbody>{data.items.map(event => <tr key={event.id}><td data-label="Action / Company">{event.action.replaceAll("_", " ")}<span className="helper">{event.companyName ?? "Platform"}</span></td><td data-label="Reason">{event.reason ?? "Not applicable"}</td><td data-label="Actor ID" className="platform-id">{event.actorId}</td><td data-label="Time (UTC)">{event.createdAt.replace("T", " ").slice(0, 19)}</td></tr>)}</tbody></table></div> : <p className="empty-state">No administrative events match this search.</p>}<PlatformPagination data={data} query={query} path="/platform/audit"/></section></>;
+export default async function Audit({
+  searchParams,
+}: Readonly<{
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}>) {
+  const query = platformQuery(await searchParams);
+  const data = await platformServices().audit(query);
+  return (
+    <>
+      <div className="page-heading">
+        <div>
+          <h1>Audit Log</h1>
+          <p className="muted">Administrative events are recorded when their changes commit.</p>
+        </div>
+      </div>
+      <section className="platform-panel">
+        <PlatformSearch query={query} placeholder="Search action or Company" />
+        {data.items.length ? (
+          <div className="platform-table-wrap">
+            <table className="platform-table">
+              <thead>
+                <tr>
+                  <th>Action / Company</th>
+                  <th>Reason</th>
+                  <th>Actor ID</th>
+                  <th>Time (UTC)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.items.map((event) => (
+                  <tr key={event.id}>
+                    <td data-label="Action / Company">
+                      {event.action.replaceAll("_", " ")}
+                      <span className="helper">{event.companyName ?? "Platform"}</span>
+                    </td>
+                    <td data-label="Reason">{event.reason ?? "Not applicable"}</td>
+                    <td data-label="Actor ID" className="platform-id">
+                      {event.actorId}
+                    </td>
+                    <td data-label="Time (UTC)">
+                      {event.createdAt.replace("T", " ").slice(0, 19)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="empty-state">No administrative events match this search.</p>
+        )}
+        <PlatformPagination data={data} query={query} path="/platform/audit" />
+      </section>
+    </>
+  );
 }

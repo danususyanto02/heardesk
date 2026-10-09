@@ -1,2 +1,4 @@
-import {DetailSkeleton} from "@/components/skeleton";
-export default function Loading(){return <DetailSkeleton/>;}
+import { DetailSkeleton } from "@/components/skeleton";
+export default function Loading() {
+  return <DetailSkeleton />;
+}

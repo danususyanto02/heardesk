@@ -4,5 +4,9 @@ import { createCompanyServices } from "./composition/company-services";
 
 export { feedbackQueryInput } from "./feedback-query";
 export async function companyApi(request: Request, companyId: string) {
-  return { actor: await requireActor(request.headers), companyId, services: createCompanyServices(db) };
+  return {
+    actor: await requireActor(request.headers),
+    companyId,
+    services: createCompanyServices(db),
+  };
 }
