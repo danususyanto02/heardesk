@@ -8,6 +8,24 @@ pipeline {
     }
 
     stages {
+        stage('Prepare Node.js') {
+            steps {
+                script {
+                    def nodeHome = tool name: 'NodeJS-22',
+                        type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+
+                    env.PATH = "${nodeHome}/bin:${env.PATH}"
+                    echo "Using Jenkins NodeJS tool: ${nodeHome}"
+                }
+
+                sh '''
+                    set -eu
+                    command -v node
+                    command -v npm
+                '''
+            }
+        }
+
         stage('Check Environment') {
             steps {
                 sh '''
@@ -76,10 +94,14 @@ pipeline {
                         withEnv(["SCANNER_HOME=${scannerHome}"]) {
                             sh '''
                                 set -eu
+                                test -s sonar-project.properties
                                 test -s coverage/lcov.info
-                                "$SCANNER_HOME/bin/sonar-scanner" \
-                                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                                  -Dsonar.qualitygate.wait=true \
+                                "$SCANNER_HOME/bin/sonar-scanner" \\
+                                  -Dsonar.sources=src,scripts,public \\
+                                  -Dsonar.tests=tests \\
+                                  '-Dsonar.exclusions=src/generated/**' \\
+                                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
+                                  -Dsonar.qualitygate.wait=true \\
                                   -Dsonar.qualitygate.timeout=300
                             '''
                         }
