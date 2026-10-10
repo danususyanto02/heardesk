@@ -1,6 +1,6 @@
 # Contributing
 
-Use Node.js24 and an isolated PostgreSQL development/test database. Install from lockfile with `npm ci`. Do not use another application's database for schema development, resets, or fixtures.
+Use Node.js 22.18+ or 24.11+ and an isolated PostgreSQL development/test database. Install from lockfile with `npm ci`. Do not use another application's database for schema development, resets, or fixtures.
 
 Run `npm run format` after edits and `npm run format:check` before proposing changes. Use two-space indentation, separate variable declarations, and explicit braces for conditions and loops. Keep blank lines between distinct operations. Replace nested ternaries with named decisions or focused components. `npm run lint` enforces these readability rules; `npm run lint:fix` applies safe syntax fixes. Generated code and applied migrations are excluded.
 

@@ -32,7 +32,7 @@
     "lint:fix": "eslint src scripts tests public/widget.js --fix"
   },
   "engines": {
-    "node": ">=24"
+    "node": "^22.18.0 || >=24.11.0"
   },
   "dependencies": {
     "@fontsource/source-sans-3": "5.3.0",
