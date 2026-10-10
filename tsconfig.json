@@ -31,5 +31,5 @@
     ".next-heardesk/types/**/*.ts",
     ".next-heardesk/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", ".next-sonar"]
 }

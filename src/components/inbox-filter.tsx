@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Funnel, X } from "@phosphor-icons/react";
+import { FunnelIcon, XIcon } from "@phosphor-icons/react";
 import { types, statuses, typeLabels, statusLabels } from "@/lib/validation";
 export function InboxFilter({
   websites,
@@ -148,7 +148,7 @@ export function InboxFilter({
           }
         }}
       >
-        <Funnel size={18} aria-hidden />
+        <FunnelIcon size={18} aria-hidden />
         Filter{count ? ` (${count})` : ""}
       </button>
       {open &&
@@ -170,7 +170,7 @@ export function InboxFilter({
                 aria-label="Tutup filter"
                 onClick={close}
               >
-                <X size={18} aria-hidden />
+                <XIcon size={18} aria-hidden />
               </button>
             </header>
             <div className="filter-list-scroll">

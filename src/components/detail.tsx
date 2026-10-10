@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Paperclip } from "@phosphor-icons/react";
+import { ArrowLeftIcon, PaperclipIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { typeLabels, statusLabels, statuses } from "@/lib/validation";
 import { DetailSkeleton } from "./skeleton";
@@ -75,7 +75,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
       setSaving(false);
     }
   }
-  async function addNote(event: React.FormEvent) {
+  async function addNote(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft.trim() || !item) {
       return;
@@ -98,7 +98,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
   return (
     <>
       <Link href={back} className="back-link">
-        <ArrowLeft size={18} />
+        <ArrowLeftIcon size={18} />
         Kembali ke feedback
       </Link>
       {loading && <DetailSkeleton />}
@@ -148,7 +148,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
           {item.attachment && (
             <details className="disclosure">
               <summary>
-                <Paperclip size={18} />
+                <PaperclipIcon size={18} />
                 Lihat screenshot
               </summary>
               <figure>

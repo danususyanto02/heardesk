@@ -65,7 +65,7 @@ export function ClientAuth({
   const modeDescription =
     mode === "verify" && verified ? VERIFIED_OVERRIDES.description : base.description;
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");

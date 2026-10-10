@@ -2,7 +2,12 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { MagnifyingGlass, CaretLeft, CaretRight, Paperclip } from "@phosphor-icons/react";
+import {
+  MagnifyingGlassIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  PaperclipIcon,
+} from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { typeLabels, statusLabels } from "@/lib/validation";
 import { PageSize } from "./page-size";
@@ -59,7 +64,7 @@ function FeedbackTable({
             <td className="attachment-cell">
               {item.attachment ? (
                 <span>
-                  <Paperclip size={16} aria-hidden />1 screenshot
+                  <PaperclipIcon size={16} aria-hidden />1 screenshot
                 </span>
               ) : (
                 "Tidak ada"
@@ -243,7 +248,7 @@ export function Inbox() {
               update("q", search);
             }}
           >
-            <MagnifyingGlass size={18} aria-hidden />
+            <MagnifyingGlassIcon size={18} aria-hidden />
             <label className="sr-only" htmlFor="search">
               Cari isi feedback
             </label>
@@ -310,7 +315,7 @@ export function Inbox() {
                   disabled={result.page <= 1}
                   onClick={() => update("page", String(result.page - 1))}
                 >
-                  <CaretLeft />
+                  <CaretLeftIcon />
                 </button>
                 <span className="page-number">{result.page}</span>
                 <button
@@ -319,7 +324,7 @@ export function Inbox() {
                   disabled={result.page * result.pageSize >= result.total}
                   onClick={() => update("page", String(result.page + 1))}
                 >
-                  <CaretRight />
+                  <CaretRightIcon />
                 </button>
               </div>
               <PageSize value={result.pageSize} />

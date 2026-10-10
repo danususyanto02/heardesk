@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { DownloadSimple, X } from "@phosphor-icons/react";
+import { DownloadSimpleIcon, XIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import type { FeedbackStatistics, FeedbackPeriod } from "@/modules/feedback/domain/statistics";
 import { ChartSkeleton, SummarySkeleton } from "./skeleton";
@@ -157,7 +157,7 @@ export function InboxStatistics({
       instance?.destroy();
     };
   }, [data, loading, year]);
-  async function download(event: React.FormEvent<HTMLFormElement>) {
+  async function download(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setExportBusy(true);
     setExportError("");
@@ -215,7 +215,7 @@ export function InboxStatistics({
             dialog.current?.showModal();
           }}
         >
-          <DownloadSimple size={18} aria-hidden />
+          <DownloadSimpleIcon size={18} aria-hidden />
           Export Excel
         </button>
       </header>
@@ -334,7 +334,7 @@ export function InboxStatistics({
             disabled={exportBusy}
             onClick={() => dialog.current?.close()}
           >
-            <X aria-hidden />
+            <XIcon aria-hidden />
           </button>
         </header>
         <p className="helper">

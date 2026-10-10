@@ -1,9 +1,17 @@
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { parse } from "dotenv";
-import { integrationEnvironment } from "./integration-config";
+import { integrationEnvironment, integrationEnvFile } from "./integration-config";
 
-const values = integrationEnvironment(parse(readFileSync(".env.test")));
+let values: Record<string, string>;
+try {
+  values = integrationEnvironment(parse(readFileSync(integrationEnvFile(process.env))));
+} catch {
+  console.error(
+    "Cannot load isolated integration test configuration. Check the test environment file and both ureport_test connections.",
+  );
+  process.exit(1);
+}
 const result = spawnSync(
   process.execPath,
   [

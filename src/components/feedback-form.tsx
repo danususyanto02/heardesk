@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { X, Paperclip, CheckCircle } from "@phosphor-icons/react";
+import { XIcon, PaperclipIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { cleanPageUrl, types, typeLabels } from "@/lib/validation";
 export function FeedbackForm({
@@ -101,7 +101,7 @@ export function FeedbackForm({
     }
     setFile(value);
   }
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     if (preview) {
@@ -163,7 +163,7 @@ export function FeedbackForm({
             onClick={close}
             aria-label="Tutup formulir"
           >
-            <X size={20} />
+            <XIcon size={20} />
           </button>
         )}
       </header>
@@ -172,7 +172,7 @@ export function FeedbackForm({
           <output className="sr-only" aria-live="polite">
             Masukan berhasil dikirim.
           </output>
-          <CheckCircle size={40} weight="regular" />
+          <CheckCircleIcon size={40} weight="regular" />
           <h2>Feedback sudah diterima</h2>
           <p className="muted">
             Terima kasih. Masukan Anda tersimpan untuk ditinjau admin website.
@@ -231,7 +231,7 @@ export function FeedbackForm({
           </label>
           <div>
             <label className="upload-label">
-              <Paperclip size={18} />
+              <PaperclipIcon size={18} />
               Screenshot <span className="helper">(opsional)</span>
               <input
                 ref={input}

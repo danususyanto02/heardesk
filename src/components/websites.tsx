@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Code, SlidersHorizontal } from "@phosphor-icons/react";
+import { CodeIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { Settings } from "./settings";
 import { PageSize } from "./page-size";
@@ -71,7 +71,7 @@ export function Websites({ companyId }: Readonly<{ companyId: string }>) {
       </>
     );
   }
-  async function create(event: React.FormEvent<HTMLFormElement>) {
+  async function create(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
@@ -156,7 +156,7 @@ export function Websites({ companyId }: Readonly<{ companyId: string }>) {
                               aria-label={`Installation code for ${site.name}`}
                               href={`${base}&site=${site.id}#installation-code`}
                             >
-                              <Code size={20} aria-hidden />
+                              <CodeIcon size={20} aria-hidden />
                               <span>Installation code</span>
                             </Link>
                           </td>
@@ -166,7 +166,7 @@ export function Websites({ companyId }: Readonly<{ companyId: string }>) {
                               aria-label={`Settings for ${site.name}`}
                               href={`${base}&site=${site.id}#website-settings`}
                             >
-                              <SlidersHorizontal size={20} aria-hidden />
+                              <SlidersHorizontalIcon size={20} aria-hidden />
                               <span>Settings</span>
                             </Link>
                           </td>

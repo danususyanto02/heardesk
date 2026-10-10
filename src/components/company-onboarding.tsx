@@ -25,7 +25,7 @@ export function CompanyOnboarding({
       setBusy(false);
     }
   }
-  async function create(event: React.FormEvent<HTMLFormElement>) {
+  async function create(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");

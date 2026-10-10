@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle, Paperclip, X } from "@phosphor-icons/react";
+import { CheckCircleIcon, PaperclipIcon, XIcon } from "@phosphor-icons/react";
 import { types, typeLabels } from "@/lib/validation";
 
 export function DemoForm({ close }: Readonly<{ close: () => void }>) {
@@ -39,7 +39,7 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
     }
     setFile(next ?? null);
   }
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     if (!message.trim()) {
@@ -66,7 +66,7 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
           <p className="helper">Demo untuk website.example</p>
         </div>
         <button className="btn quiet icon-btn" onClick={close} aria-label="Tutup formulir">
-          <X size={20} />
+          <XIcon size={20} />
         </button>
       </header>
       {done ? (
@@ -74,7 +74,7 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
           <output className="sr-only" aria-live="polite">
             Simulasi selesai
           </output>
-          <CheckCircle size={40} aria-hidden />
+          <CheckCircleIcon size={40} aria-hidden />
           <h2 tabIndex={-1} ref={(element) => element?.focus()}>
             Simulasi selesai
           </h2>
@@ -127,7 +127,7 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
           </label>
           <div>
             <label className="upload-label">
-              <Paperclip size={18} aria-hidden />
+              <PaperclipIcon size={18} aria-hidden />
               Screenshot <span className="helper">(opsional)</span>
               <input
                 ref={fileInput}
