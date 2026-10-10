@@ -19,6 +19,7 @@ backups/
 # Test artifacts
 test-results/
 playwright-report/
+coverage/
 integration-test.html
 *.tsbuildinfo
 

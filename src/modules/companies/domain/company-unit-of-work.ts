@@ -3,10 +3,10 @@ import type { FeedbackRepository } from "../../feedback/domain/feedback-reposito
 import type { WebsiteRepository } from "../../websites/domain/website-repository";
 import type { UsageRepository } from "../../usage/domain/usage";
 import type { AuditWriter } from "../../platform/domain/audit";
-import type { AccessSnapshot, AuthorizedCompany, CompanyId, Permission } from "./access";
+import type { AccessSnapshot, AuthorizedCompany, Permission } from "./access";
 
 export interface CompanyAccessReader {
-  snapshot(companyId: CompanyId, userId: string): Promise<AccessSnapshot | null>;
+  snapshot(companyId: string, userId: string): Promise<AccessSnapshot | null>;
 }
 export interface CompanyTransaction {
   access: CompanyAccessReader;
@@ -18,13 +18,13 @@ export interface CompanyTransaction {
 export interface CompanyUnitOfWork<Repositories = CompanyTransaction> {
   read<T>(
     actor: Actor,
-    companyId: CompanyId,
+    companyId: string,
     permission: Permission,
     work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>,
   ): Promise<T>;
   write<T>(
     actor: Actor,
-    companyId: CompanyId,
+    companyId: string,
     permission: Permission,
     work: (scope: AuthorizedCompany, tx: Repositories) => Promise<T>,
   ): Promise<T>;

@@ -15,7 +15,11 @@ jobs:
       - run: npm run db:generate
         env:
           DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/ureport
-      - run: npm test
+      - run: npm run test:coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov.info
       - run: npm run typecheck
       - run: npm run build
         env:

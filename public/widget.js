@@ -13,8 +13,11 @@
   const button = document.createElement("button");
   const container = document.createElement("div");
   let lastFocus;
-  // Non-security: generates a DOM id for aria-controls, not a token or secret.
-  const id = "ureport-" + Math.random().toString(36).slice(2);
+  let number = 1;
+  while (document.getElementById(`ureport-feedback-${number}`)) {
+    number++;
+  }
+  const id = `ureport-feedback-${number}`;
   frame.id = id;
   frame.title = "Kirim feedback";
   frame.src =

@@ -14,7 +14,7 @@ export function InboxFilter({
   const [draft, setDraft] = useState({ siteId: "", type: "", status: "" });
   const [position, setPosition] = useState({ top: 0, left: 0, maxHeight: 500 });
   const trigger = useRef<HTMLButtonElement>(null);
-  const panel = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDialogElement>(null);
   const count =
     Number(!!params.get("siteId")) + Number(!!params.get("type")) + Number(!!params.get("status"));
   function close(restoreFocus: unknown = true) {
@@ -54,15 +54,7 @@ export function InboxFilter({
     }
     place();
     panel.current?.focus();
-    const outside = (event: PointerEvent) => {
-      if (
-        !panel.current?.contains(event.target as Node) &&
-        !trigger.current?.contains(event.target as Node)
-      ) {
-        close(false);
-      }
-    };
-    const focus = (event: FocusEvent) => {
+    const outside = (event: PointerEvent | FocusEvent) => {
       if (
         !panel.current?.contains(event.target as Node) &&
         !trigger.current?.contains(event.target as Node)
@@ -71,13 +63,9 @@ export function InboxFilter({
       }
     };
     const key = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        close();
-      } else if (
-        event.key === "Tab" &&
-        event.shiftKey &&
-        document.activeElement === panel.current
+      if (
+        event.key === "Escape" ||
+        (event.key === "Tab" && event.shiftKey && document.activeElement === panel.current)
       ) {
         event.preventDefault();
         close();
@@ -89,13 +77,13 @@ export function InboxFilter({
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
     document.addEventListener("pointerdown", outside);
-    document.addEventListener("focusin", focus);
+    document.addEventListener("focusin", outside);
     document.addEventListener("keydown", key);
     return () => {
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
       document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("focusin", focus);
+      document.removeEventListener("focusin", outside);
       document.removeEventListener("keydown", key);
     };
   }, [open]);
@@ -165,11 +153,11 @@ export function InboxFilter({
       </button>
       {open &&
         createPortal(
-          <div
+          <dialog
+            open
             ref={panel}
             id="inbox-filter-popover"
             className="inbox-filter-popover"
-            role="dialog"
             aria-label="Filter feedback"
             tabIndex={-1}
             style={{ top: position.top, left: position.left, maxHeight: position.maxHeight }}
@@ -219,7 +207,7 @@ export function InboxFilter({
                 Terapkan
               </button>
             </footer>
-          </div>,
+          </dialog>,
           document.body,
         )}
     </>

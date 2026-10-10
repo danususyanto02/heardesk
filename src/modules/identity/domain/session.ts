@@ -1,6 +1,5 @@
-export type UserId = string;
 export type Actor = Readonly<{
-  userId: UserId;
+  userId: string;
   emailVerified: boolean;
   platformRole: "USER" | "PLATFORM_OWNER";
 }>;

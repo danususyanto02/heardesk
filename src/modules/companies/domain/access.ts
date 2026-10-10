@@ -1,4 +1,3 @@
-export type CompanyId = string;
 export type CompanyRole = "OWNER" | "ADMIN" | "AGENT" | "VIEWER";
 export const permissions = [
   "company:read",
@@ -14,7 +13,7 @@ export const permissions = [
 ] as const;
 export type Permission = (typeof permissions)[number];
 export type AccessSnapshot = Readonly<{
-  companyId: CompanyId;
+  companyId: string;
   userId: string;
   role: CompanyRole;
   status: "ACTIVE" | "SUSPENDED";
@@ -22,7 +21,7 @@ export type AccessSnapshot = Readonly<{
 
 declare const authorizedCompany: unique symbol;
 export type AuthorizedCompany = Readonly<{
-  companyId: CompanyId;
+  companyId: string;
   actorId: string;
   role: CompanyRole;
   permission: Permission;

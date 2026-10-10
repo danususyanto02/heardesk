@@ -1,13 +1,13 @@
 import type { PrismaClient, Prisma } from "@/generated/prisma/client";
 import type { Actor } from "../../identity/domain/session";
-import type { CompanyId, CompanyRole, Permission, AuthorizedCompany } from "../domain/access";
+import type { CompanyRole, Permission, AuthorizedCompany } from "../domain/access";
 import { authorizeCompany } from "../application/authorize-company";
 
 export function createCompanyAccess(db: PrismaClient) {
   async function run<T>(
     write: boolean,
     actor: Actor,
-    companyId: CompanyId,
+    companyId: string,
     permission: Permission,
     work: (scope: AuthorizedCompany, tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
@@ -48,13 +48,13 @@ export function createCompanyAccess(db: PrismaClient) {
   return {
     read: <T>(
       actor: Actor,
-      companyId: CompanyId,
+      companyId: string,
       permission: Permission,
       work: (scope: AuthorizedCompany, tx: Prisma.TransactionClient) => Promise<T>,
     ) => run(false, actor, companyId, permission, work),
     write: <T>(
       actor: Actor,
-      companyId: CompanyId,
+      companyId: string,
       permission: Permission,
       work: (scope: AuthorizedCompany, tx: Prisma.TransactionClient) => Promise<T>,
     ) => run(true, actor, companyId, permission, work),

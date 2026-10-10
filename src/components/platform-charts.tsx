@@ -159,7 +159,7 @@ export function PlatformCharts({
           </div>
           <div className="calendar-chart-controls">
             <label>
-              Period
+              <span>Period</span>
               <select value={period} onChange={(event) => setPeriod(event.target.value)}>
                 <option value="monthly">Monthly</option>
                 <option value="annual">Annual</option>
@@ -167,7 +167,7 @@ export function PlatformCharts({
             </label>
             {period === "monthly" && (
               <label>
-                Month
+                <span>Month</span>
                 <select value={month} onChange={(event) => setMonth(Number(event.target.value))}>
                   {months.map((name, index) => (
                     <option key={name} value={index + 1}>
@@ -178,7 +178,7 @@ export function PlatformCharts({
               </label>
             )}
             <label>
-              Year
+              <span>Year</span>
               <select value={year} onChange={(event) => setYear(Number(event.target.value))}>
                 {[...new Set([year, ...years])]
                   .sort((a, b) => b - a)

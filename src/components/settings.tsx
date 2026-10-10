@@ -250,7 +250,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
             <section id="website-settings">
               <h2>Website Anda</h2>
               <label>
-                Nama website
+                <span>Nama website</span>
                 <input
                   value={draft.name}
                   required
@@ -259,7 +259,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
                 />
               </label>
               <label>
-                Alamat website
+                <span>Alamat website</span>
                 <input
                   value={draft.origin}
                   type="url"
@@ -275,7 +275,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
             <section>
               <h2>Tampilan tombol</h2>
               <label>
-                Teks tombol
+                <span>Teks tombol</span>
                 <input
                   value={draft.buttonLabel}
                   required
@@ -326,9 +326,9 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
             <button type="submit" className="btn primary" disabled={busy || rotating}>
               {busy ? "Menyimpan…" : "Simpan pengaturan"}
             </button>
-            <p className="helper" role="status">
+            <output className="helper" aria-live="polite">
               {notice}
-            </p>
+            </output>
           </div>
         </form>
         <aside className="settings-preview">

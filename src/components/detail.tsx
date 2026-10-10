@@ -122,7 +122,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
               </p>
             </div>
             <label>
-              Status
+              <span>Status</span>
               <select
                 value={item.status}
                 disabled={saving}
@@ -136,9 +136,9 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
               </select>
             </label>
           </header>
-          <p className="status-feedback helper" role="status">
+          <output className="status-feedback helper" aria-live="polite">
             {statusText}
-          </p>
+          </output>
           {error && (
             <p className="error" role="alert">
               {error}
@@ -194,7 +194,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
             )}
             <form onSubmit={addNote} className="form-stack">
               <label>
-                Tambah catatan
+                <span>Tambah catatan</span>
                 <textarea
                   value={draft}
                   onChange={(e) => changeDraft(e.target.value)}

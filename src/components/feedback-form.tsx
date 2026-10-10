@@ -168,7 +168,10 @@ export function FeedbackForm({
         )}
       </header>
       {success ? (
-        <div className="widget-success" role="status">
+        <div className="widget-success">
+          <output className="sr-only" aria-live="polite">
+            Masukan berhasil dikirim.
+          </output>
           <CheckCircle size={40} weight="regular" />
           <h2>Feedback sudah diterima</h2>
           <p className="muted">
@@ -265,7 +268,7 @@ export function FeedbackForm({
               Tambahkan email <span className="helper">(opsional)</span>
             </summary>
             <label>
-              Email
+              <span>Email</span>
               <input
                 type="email"
                 value={email}

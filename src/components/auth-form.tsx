@@ -58,7 +58,7 @@ export function AuthForm({
         </a>
         <section className="auth-panel">
           <h1>Akun admin sudah dibuat</h1>
-          <p role="status">{error}</p>
+          <output aria-live="polite">{error}</output>
           <a className="btn primary" href="/login?setup=done">
             Masuk ke akun baru
           </a>

@@ -1,4 +1,4 @@
-import type { AuthorizedCompany, CompanyId } from "../../companies/domain/access";
+import type { AuthorizedCompany } from "../../companies/domain/access";
 
 export type CompanyLimits = Readonly<{
   websites: number;
@@ -16,7 +16,7 @@ export type CompanyUsageSnapshot = Readonly<{
 }>;
 export type ReportReservation = Readonly<{
   id: string;
-  companyId: CompanyId;
+  companyId: string;
   siteId: number;
   submissionId: string;
   period: string;

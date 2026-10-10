@@ -10,8 +10,10 @@ function LoadingFrame({
   className?: string;
 }>) {
   return (
-    <div className={`skeleton-frame ${className}`} role="status" aria-label={label}>
-      <span className="sr-only">{label}</span>
+    <div className={`skeleton-frame ${className}`}>
+      <output className="sr-only" aria-label={label} aria-live="polite">
+        {label}
+      </output>
       <div aria-hidden="true">{children}</div>
     </div>
   );

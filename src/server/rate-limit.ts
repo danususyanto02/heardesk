@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomInt } from "node:crypto";
 import { db } from "./db";
 import { env } from "./env";
 import { HttpError } from "./http";
@@ -25,7 +25,7 @@ export async function rateLimit(key: string, max: number, seconds = 60) {
   }
   // Non-security sampling: this only decides how often expired buckets are swept.
   // Rate-limit enforcement is the INSERT/count above; predicting this value grants no bypass.
-  if (Math.random() < 0.02) {
+  if (randomInt(50) === 0) {
     await db.rateBucket.deleteMany({
       where: { expiresAt: { lt: new Date(Date.now() - 3600000) } },
     });
