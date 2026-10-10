@@ -16,7 +16,14 @@ pipeline {
                     java -version
                     node --version
                     npm --version
-                    node -e 'if (Number(process.versions.node.split(".")[0]) < 24) { console.error("HearDesk requires Node.js 24 or newer."); process.exit(1); }'
+                    node -e '
+                        const [major, minor] = process.versions.node.split(".").map(Number);
+                        const supported = (major === 22 && minor >= 18) || major > 24 || (major === 24 && minor >= 11);
+                        if (!supported) {
+                            console.error("HearDesk requires Node.js 22.18+ or 24.11+.");
+                            process.exit(1);
+                        }
+                    '
                 '''
             }
         }

@@ -113,7 +113,7 @@ native non-modal filter remains anchored, with visible controls and no overflow.
 
 The repository `Jenkinsfile` adapts the existing Jenkins Pipeline Script, keeping
 `github-heardesk`, `SonarScanner`, `SonarQube-WSL`, and the `master` checkout.
-The build agent needs Git, Java, Node.js 24 or newer, and npm available on PATH.
+The build agent needs Git, Java, Node.js 22.18+ or 24.11+, and npm available on PATH.
 No additional Jenkins NodeJS plugin installation is assumed.
 
 Stages install locked development dependencies, generate Prisma Client, run
