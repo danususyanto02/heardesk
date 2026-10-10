@@ -48,7 +48,7 @@ export function PlatformUserEditor({
         }}
       >
         <label>
-          Reason for account action
+          <span>Reason for account action</span>
           <textarea
             required
             maxLength={500}
@@ -80,7 +80,7 @@ export function PlatformUserEditor({
             {error}
           </p>
         )}
-        {notice && <p role="status">{notice}</p>}
+        {notice && <output aria-live="polite">{notice}</output>}
       </form>
     </section>
   );

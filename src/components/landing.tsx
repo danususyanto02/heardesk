@@ -169,24 +169,7 @@ export function Landing({
           {accountLabel}
         </Link>
       </footer>
-      <dialog
-        ref={dialog}
-        className="landing-demo"
-        aria-label="Widget demo"
-        onClick={(event) => {
-          if (event.target === dialog.current) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            if (
-              event.clientX < rect.left ||
-              event.clientX > rect.right ||
-              event.clientY < rect.top ||
-              event.clientY > rect.bottom
-            ) {
-              dialog.current?.close();
-            }
-          }
-        }}
-      >
+      <dialog ref={dialog} className="landing-demo" aria-label="Widget demo" closedby="any">
         <DemoForm key={session} close={() => dialog.current?.close()} />
       </dialog>
     </div>

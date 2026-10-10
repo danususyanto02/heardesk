@@ -16,12 +16,13 @@ test("data skeletons remain until response, disappear on success/error and respe
   });
   await page.goto("/inbox");
   const loading = page.getByRole("status", { name: "Memuat daftar feedback" });
+  const shapes = page.locator(".skeleton-frame").filter({ has: loading });
   await expect(loading).toBeVisible();
-  await expect(loading.locator(".skeleton-block").first()).toBeVisible();
+  await expect(shapes.locator(".skeleton-block").first()).toBeVisible();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect
     .poll(() =>
-      loading
+      shapes
         .locator(".skeleton-block")
         .first()
         .evaluate((el) => getComputedStyle(el).animationName),

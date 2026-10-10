@@ -101,10 +101,36 @@ test("setup, private admin, anonymous widget, attachments and logout", async ({
   expect(hostile.status()).toBe(403);
   const anonymous = await browser.newContext();
   const visitor = await anonymous.newPage();
+  await visitor.addInitScript(() => {
+    const insertCollision = () => {
+      const element = document.createElement("div");
+      element.id = "ureport-feedback-1";
+      document.documentElement.append(element);
+    };
+    if (document.documentElement) {
+      insertCollision();
+    } else {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement) {
+          observer.disconnect();
+          insertCollision();
+        }
+      });
+      observer.observe(document, { childList: true });
+    }
+  });
   await visitor.goto(
     `http://localhost:3200/page?site=${site.publicKey}&token=must-not-send#secret`,
   );
   await visitor.getByRole("button", { name: "Beri masukan" }).click();
+  await expect(visitor.locator('iframe[title="Kirim feedback"]')).toHaveAttribute(
+    "id",
+    "ureport-feedback-2",
+  );
+  await expect(visitor.getByRole("button", { name: "Beri masukan" })).toHaveAttribute(
+    "aria-controls",
+    "ureport-feedback-2",
+  );
   const widget = visitor.frameLocator('iframe[title="Kirim feedback"]');
   await widget.getByLabel(/Pesan/).fill("Laporan pengunjung tanpa login, screenshot terlampir.");
   const png = await sharp({ create: { width: 20, height: 20, channels: 3, background: "blue" } })

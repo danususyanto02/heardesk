@@ -4,13 +4,12 @@ import {
   CompanyAccessError,
   type AccessSnapshot,
   type AuthorizedCompany,
-  type CompanyId,
   type Permission,
 } from "../domain/access";
 
 export function authorizeCompany(
   actor: Actor,
-  companyId: CompanyId,
+  companyId: string,
   snapshot: AccessSnapshot | null,
   permission: Permission,
 ): AuthorizedCompany {

@@ -135,18 +135,18 @@ export function ClientAuth({
           </p>
         )}
         <p className="muted">{modeDescription}</p>
-        {done && <p role="status">{base.doneMessage}</p>}
+        {done && <output aria-live="polite">{base.doneMessage}</output>}
         {!done && !verified && (
           <form onSubmit={submit} className="form-stack">
             {mode === "signup" && (
               <label>
-                Your name
+                <span>Your name</span>
                 <input name="name" required maxLength={120} autoComplete="name" />
               </label>
             )}
             {mode !== "reset" && (
               <label>
-                Email
+                <span>Email</span>
                 <input name="email" type="email" required maxLength={254} autoComplete="email" />
               </label>
             )}

@@ -221,7 +221,7 @@ export function InboxStatistics({
       </header>
       <div className={styles.summary} data-testid="analytics-summary">
         <label className={styles.year}>
-          Tahun
+          <span>Tahun</span>
           <select
             aria-label="Tahun grafik"
             value={year}
@@ -342,7 +342,7 @@ export function InboxStatistics({
         </p>
         <form className="form-stack" onSubmit={download}>
           <label>
-            Periode ekspor
+            <span>Periode ekspor</span>
             <select
               value={period}
               disabled={exportBusy}
@@ -355,7 +355,7 @@ export function InboxStatistics({
           </label>
           {period !== "all" && (
             <label>
-              Tahun ekspor
+              <span>Tahun ekspor</span>
               <input
                 type="number"
                 min={1900}
@@ -369,7 +369,7 @@ export function InboxStatistics({
           )}
           {period === "monthly" && (
             <label>
-              Bulan ekspor
+              <span>Bulan ekspor</span>
               <select
                 value={month}
                 disabled={exportBusy}
@@ -384,7 +384,7 @@ export function InboxStatistics({
             </label>
           )}
           <label>
-            Website ekspor
+            <span>Website ekspor</span>
             <select
               value={exportSite}
               disabled={exportBusy}

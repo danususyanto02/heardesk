@@ -104,7 +104,7 @@ export function CompanyOnboarding({
         {creating && (
           <form className="form-stack" onSubmit={create}>
             <label>
-              Company name
+              <span>Company name</span>
               <input
                 name="name"
                 required

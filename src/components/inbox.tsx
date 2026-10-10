@@ -23,11 +23,11 @@ function FeedbackTable({
   items,
   companyId,
   query,
-}: {
+}: Readonly<{
   items: Item[];
   companyId: string;
   query: string;
-}) {
+}>) {
   return (
     <table>
       <thead>
@@ -82,11 +82,11 @@ function InboxEmptyState({
   hasFilters,
   companyId,
   onReset,
-}: {
+}: Readonly<{
   hasFilters: boolean;
   companyId: string;
   onReset: () => void;
-}) {
+}>) {
   return (
     <div className="empty-state">
       <h3>{hasFilters ? "Tidak ada feedback yang cocok" : "Belum ada feedback"}</h3>

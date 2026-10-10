@@ -214,7 +214,7 @@ export function Websites({ companyId }: Readonly<{ companyId: string }>) {
           <h2>Add website</h2>
           <form className="form-stack" onSubmit={create}>
             <label>
-              Website name
+              <span>Website name</span>
               <input
                 value={name}
                 maxLength={100}
@@ -222,7 +222,7 @@ export function Websites({ companyId }: Readonly<{ companyId: string }>) {
               />
             </label>
             <label>
-              Website address
+              <span>Website address</span>
               <input
                 type="url"
                 required

@@ -67,7 +67,7 @@ export function PlatformCompanyEditor({ initial }: Readonly<{ initial: PlatformC
           }}
         >
           <label>
-            Reason for status change
+            <span>Reason for status change</span>
             <textarea
               value={statusReason}
               required
@@ -139,7 +139,7 @@ export function PlatformCompanyEditor({ initial }: Readonly<{ initial: PlatformC
             </label>
           ))}
           <label>
-            Storage limit (bytes)
+            <span>Storage limit (bytes)</span>
             <input
               inputMode="numeric"
               pattern="[0-9]+"
@@ -153,7 +153,7 @@ export function PlatformCompanyEditor({ initial }: Readonly<{ initial: PlatformC
             />
           </label>
           <label>
-            Reason for allowance change
+            <span>Reason for allowance change</span>
             <textarea
               required
               maxLength={500}
@@ -173,9 +173,9 @@ export function PlatformCompanyEditor({ initial }: Readonly<{ initial: PlatformC
         </p>
       )}
       {notice && (
-        <p className="platform-feedback" role="status">
+        <output className="platform-feedback" aria-live="polite">
           {notice}
-        </p>
+        </output>
       )}
     </div>
   );

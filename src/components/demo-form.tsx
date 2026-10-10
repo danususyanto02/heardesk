@@ -70,7 +70,10 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
         </button>
       </header>
       {done ? (
-        <div className="widget-success" role="status">
+        <div className="widget-success">
+          <output className="sr-only" aria-live="polite">
+            Simulasi selesai
+          </output>
           <CheckCircle size={40} aria-hidden />
           <h2 tabIndex={-1} ref={(element) => element?.focus()}>
             Simulasi selesai
@@ -158,7 +161,7 @@ export function DemoForm({ close }: Readonly<{ close: () => void }>) {
               Tambahkan email <span className="helper">(opsional)</span>
             </summary>
             <label>
-              Email
+              <span>Email</span>
               <input
                 type="email"
                 maxLength={254}

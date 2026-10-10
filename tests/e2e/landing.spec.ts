@@ -47,6 +47,9 @@ test("public landing demo never writes feedback and works on mobile", async ({ p
   await page.keyboard.press("Escape");
   await expect(demo).toBeHidden();
   await expect(page.getByRole("button", { name: "Try the widget", exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Try the widget", exact: true }).click();
+  await page.mouse.click(4, 4);
+  await expect(demo).toBeHidden();
   for (const width of [390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(

@@ -1,4 +1,4 @@
-import type { AuthorizedCompany, CompanyId } from "../../companies/domain/access";
+import type { AuthorizedCompany } from "../../companies/domain/access";
 
 export type WebsiteInput = Readonly<{
   name: string;
@@ -7,8 +7,7 @@ export type WebsiteInput = Readonly<{
   position: "left" | "right";
 }>;
 export type WebsiteDto = WebsiteInput &
-  Readonly<{ id: number; companyId: CompanyId; publicKey: string }>;
-export type ActiveWidgetSite = WebsiteDto;
+  Readonly<{ id: number; companyId: string; publicKey: string }>;
 export type RotationResult =
   | Readonly<{ status: "rotated"; website: WebsiteDto }>
   | Readonly<{ status: "not-found" | "stale" }>;
@@ -27,5 +26,5 @@ export interface WebsiteCreator {
   create(scope: AuthorizedCompany, input: WebsiteInput): Promise<WebsiteDto>;
 }
 export interface WidgetResolver {
-  resolve(publicKey: string): Promise<ActiveWidgetSite | null>;
+  resolve(publicKey: string): Promise<WebsiteDto | null>;
 }

@@ -13,5 +13,12 @@ export default defineConfig({
     maxWorkers: 1,
     testTimeout: 30000,
     hookTimeout: 30000,
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", "lcov"],
+      reportsDirectory: "coverage/integration",
+      include: ["src/**/*.{ts,tsx}", "scripts/**/*.ts", "public/widget.js"],
+      exclude: ["src/generated/**"],
+    },
   },
 });

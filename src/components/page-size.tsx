@@ -6,7 +6,7 @@ export function PageSize({ value }: Readonly<{ value: number }>) {
   const params = useSearchParams();
   return (
     <label className="page-size">
-      Rows per page
+      <span>Rows per page</span>
       <select
         value={value}
         onChange={(event) => {
