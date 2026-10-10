@@ -113,8 +113,15 @@ native non-modal filter remains anchored, with visible controls and no overflow.
 
 The repository `Jenkinsfile` adapts the existing Jenkins Pipeline Script, keeping
 `github-heardesk`, `SonarScanner`, `SonarQube-WSL`, and the `master` checkout.
-The build agent needs Git, Java, Node.js 22.18+ or 24.11+, and npm available on PATH.
-No additional Jenkins NodeJS plugin installation is assumed.
+The build agent needs Git and Java. Configure the Jenkins NodeJS plugin with a
+tool installation named `NodeJS-22`, automatic installation enabled, and a Node
+22.x release at least 22.18.0. The first `Prepare Node.js` stage resolves that
+installation explicitly through the Jenkins `tool` step and adds its `bin`
+directory to PATH for subsequent stages. It prints the selected directory and
+checks `command -v node` and `command -v npm`. Host/WSL Node installations are
+not assumed visible inside a Jenkins agent or container. If Console Output
+starts directly with `Check Environment`, the job is still executing an older
+pipeline definition; inspect its saved Pipeline Script or SCM script revision.
 
 Stages install locked development dependencies, generate Prisma Client, run
 unit coverage, verify a nonempty LCOV file, and scan in the same workspace.
