@@ -133,9 +133,11 @@ the fresh unit LCOV report; stale integration coverage cannot be imported.
 Project identity and source/test scope come from `sonar-project.properties`.
 The earlier `-Dsonar.sources=.` and command-line exclusions are removed so they
 cannot override the repository's source/test separation and generated-code
-exclusions. The pipeline checks the Quality Gate with scanner polling, which
-does not require configuring a Jenkins webhook. A failed gate fails the build;
-successful report submission alone is not reported as a successful gate.
+exclusions. Per the project owner's request, `sonar.qualitygate.wait=false` makes
+this an analysis/reporting job: successful tests and report submission allow
+Jenkins SUCCESS. Quality Gate remains independently visible in SonarQube and
+can still fail. Environment, test, and scanner execution failures still fail
+the job; no exit codes are swallowed and no server gate thresholds are changed.
 
 For a job currently using Pipeline Script, copy the `Jenkinsfile` content into
 that field, or change the definition to Pipeline script from SCM and use script
@@ -145,3 +147,99 @@ No local manual coverage command is required for this pipeline.
 
 Importing coverage corrects the missing report; it does not raise actual unit
 coverage to 80%. The existing gate may continue failing on coverage or issues.
+
+## 2026-10-10 execution
+
+Latest remote baseline: `master`, analysis `2026-10-10T04:34:15Z`.
+57 open code smells, 28 on new code, 0 bugs, 0 vulnerabilities, 0 security
+hotspots. New-code coverage 10%; duplication 0%. Gate ERROR for new issues and
+coverage. Local fixes require another analysis before remote counts can change.
+
+- Replaced deprecated Phosphor aliases with canonical `Icon` exports, preserving
+  existing SVG props and appearance. Replaced form-submit event types with
+  `React.SubmitEvent<HTMLFormElement>`.
+- Replaced Zod instance flattening with `flattenError(error).fieldErrors`.
+  Characterization tests preserve nested field errors, form-level errors,
+  response status, request ID, and private response headers.
+- Simplified demo website creation with lazy `??=`; existing website data and
+  keys remain untouched on seed reruns.
+- Added React component tests with jsdom 26.1.0, React Testing Library 16.3.3,
+  and DOM Testing Library 10.4.2, all compatible with Node 22.18.0. Test discovery
+  now includes `.test.tsx` while PostgreSQL tests remain separately guarded.
+- Added request-level PostgreSQL tests for Company website/detail/statistics/
+  export/key/note routes, visitor multipart validation, idempotency, private
+  image normalization, failed-image cleanup, and legacy website scope.
+- Screenshot tests own a temporary storage directory, removed in teardown even
+  when assertions fail. They never use application storage.
+- Configuration failures from integration secret files are sanitized; malformed
+  URL credentials are never attached to thrown errors or printed by the runner.
+
+### Enable integration coverage in Jenkins
+
+Create a Jenkins **Secret file** credential containing the isolated test
+configuration. Use the same required non-secret settings as local `.env.test`
+(see `scripts/test-config.ts` and `src/server/env.ts`), with both `DATABASE_URL`
+and `MIGRATION_DATABASE_URL` targeting the same dedicated `ureport_test` host,
+port and database. Runtime and migration roles may differ. Do not use the
+application database or the Prisma-generation placeholder connection.
+
+Copy the complete current `Jenkinsfile` into a Pipeline Script job, or use it
+through Pipeline script from SCM. Set build parameter
+`INTEGRATION_ENV_CREDENTIAL_ID` to that Secret file credential ID. Binding exposes
+only its temporary path as `HEARDESK_TEST_ENV_FILE`; the runner reads that file,
+validates it, and passes values to Vitest. Local default remains `.env.test`.
+
+With the parameter empty, integration stage is skipped and only unit LCOV is
+imported. With it supplied, integration failures fail the job and scanner imports
+both fresh LCOV files. Unit stage removes all prior coverage first. Neither
+credential contents nor environment dumps should be logged.
+
+### `closedby` analyzer finding
+
+Issue `64c46844-6976-4de3-a5f3-ebd90255350f`, rule `typescript:S6747`, reports
+`src/components/landing.tsx:172` as an unknown property. `closedby="any"` is a
+documented HTML dialog attribute and the installed React types accept it.
+Production Chromium E2E verifies Escape, backdrop dismissal, close button,
+focus restoration and mobile layout. Preserve native behavior; owner can review
+and mark this issue False Positive with this evidence. No remote issue status
+or rule configuration was changed.
+
+Reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog
+
+### Verification and remaining coverage
+
+Production build succeeded in `.next-sonar` and all 15 production E2E tests
+passed. Main `.next-heardesk` build was locked by an existing process, so a
+separate ignored output directory was used. Route types for normal output were
+regenerated after verification. Existing pg concurrent-query warnings and Next
+destination-stream errors still appeared in E2E logs; test results were green.
+
+Coverage excludes generated Prisma only. Component and integration reports
+measure different execution paths and must be merged by file/line, never by
+adding percentages. The 80% new-code threshold remains unchanged. Further tests
+are needed for operational scripts, authentication/proxy, server adapters and
+uncovered branches. Actual new-code coverage and issue closure require Jenkins
+analysis on the resulting revision.
+
+Final local verification for this execution:
+
+- 254 unit/component tests across 52 files passed.
+- 87 PostgreSQL integration tests across 25 files passed.
+- Unit report: lines 53.60%, branches 54.73%.
+- Integration report: lines 38.77%, branches 31.75%.
+- Union of LCOV records by normalized file/line: 2,356/2,832 lines (83.19%).
+  Union of branch records: 1,461/1,902 conditions. Combined local denominator:
+  3,817/4,734 (80.63%). This is an overall LCOV calculation, not SonarQube's
+  new-code metric; Sonar's executable-line mapping and new-code scope may differ.
+- Typecheck, ESLint, Prettier check, diff whitespace check passed.
+- Production dependency audit: 0 vulnerabilities.
+- Fresh-context review found configuration-log leakage, shared screenshot
+  storage, and date-dependent export fixture. All three were addressed:
+  malformed credential regression RED to GREEN, temporary-storage teardown,
+  fixed report timestamp with workbook count assertions.
+
+No commit, push, Jenkins credential creation, scan trigger, or remote issue
+resolution was performed. Remaining operational step: owner supplies isolated
+test Secret file, updates Pipeline Script from the complete Jenkinsfile, and
+scans the revision containing these changes. Valid `closedby` finding awaits
+owner-approved false-positive disposition or analyzer support.

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check, ArrowsClockwise, X } from "@phosphor-icons/react";
+import { CopyIcon, CheckIcon, ArrowsClockwiseIcon, XIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { FeedbackForm } from "./feedback-form";
 import { SettingsSkeleton } from "./skeleton";
@@ -79,7 +79,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
     };
   }, [retry, companyId, siteId]);
 
-  async function connect(event: React.FormEvent) {
+  async function connect(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
@@ -102,7 +102,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
     setDraft((current) => (current ? { ...current, [key]: value } : current));
     setNotice("Perubahan belum disimpan.");
   }
-  async function save(event: React.FormEvent) {
+  async function save(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft || !configuration) {
       return;
@@ -242,7 +242,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
               <code>{snippet}</code>
             </pre>
             <button className="btn primary" type="button" onClick={() => copy(snippet, "snippet")}>
-              {copied === "snippet" ? <Check /> : <Copy />}
+              {copied === "snippet" ? <CheckIcon /> : <CopyIcon />}
               {copied === "snippet" ? "Kode tersalin" : "Salin kode"}
             </button>
           </section>
@@ -313,7 +313,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
               disabled={busy || rotating}
               onClick={() => confirmation.current?.showModal()}
             >
-              <ArrowsClockwise />
+              <ArrowsClockwiseIcon />
               Perbarui kode pemasangan
             </button>
           </details>
@@ -347,7 +347,7 @@ export function Settings({ companyId, siteId }: { companyId?: string; siteId?: n
             onClick={() => confirmation.current?.close()}
             aria-label="Tutup konfirmasi"
           >
-            <X />
+            <XIcon />
           </button>
         </header>
         <p>

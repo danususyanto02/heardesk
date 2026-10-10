@@ -15,7 +15,7 @@ export function AuthForm({
   const [visible, setVisible] = useState(false);
   const [created, setCreated] = useState(false);
   const submitLabel = setup ? "Buat akun" : "Sign in";
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");

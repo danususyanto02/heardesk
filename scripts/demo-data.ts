@@ -203,18 +203,16 @@ async function seedWebsites(
     let site = await tx.site.findUnique({
       where: { companyId_origin: { companyId, origin } },
     });
-    if (!site) {
-      site = await tx.site.create({
-        data: {
-          companyId,
-          name: siteName + " (Demo)",
-          origin,
-          publicKey: randomBytes(24).toString("base64url"),
-          buttonLabel: "Send feedback",
-          position: siteIndex ? "left" : "right",
-        },
-      });
-    }
+    site ??= await tx.site.create({
+      data: {
+        companyId,
+        name: siteName + " (Demo)",
+        origin,
+        publicKey: randomBytes(24).toString("base64url"),
+        buttonLabel: "Send feedback",
+        position: siteIndex ? "left" : "right",
+      },
+    });
     sites.push(site.id);
   }
   return sites;

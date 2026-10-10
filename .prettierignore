@@ -1,6 +1,7 @@
 # Build output
 .next/
 .next-heardesk/
+.next-sonar/
 node_modules/
 dist/
 

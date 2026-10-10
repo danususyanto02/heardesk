@@ -5,6 +5,7 @@
 node_modules/
 .next/
 .next-heardesk/
+.next-sonar/
 coverage/
 playwright-report/
 test-results/

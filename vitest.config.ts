@@ -3,7 +3,7 @@ import path from "node:path";
 export default defineConfig({
   resolve: { alias: { "@": path.resolve("src") } },
   test: {
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.{ts,tsx}"],
     exclude: ["tests/integration/**"],
     testTimeout: 15000,
     coverage: {

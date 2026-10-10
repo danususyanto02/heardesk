@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { ZodError } from "zod";
+import { ZodError, flattenError } from "zod";
 import { trustedOrigin } from "@/lib/validation";
 import { env } from "./env";
 import { CompanyAccessError } from "@/modules/companies/domain/access";
@@ -111,7 +111,7 @@ export function failure(error: unknown) {
         error: {
           code: "VALIDATION_ERROR",
           message: "Periksa isian formulir.",
-          fields: error.flatten().fieldErrors,
+          fields: flattenError(error).fieldErrors,
           requestId: id,
         },
       },
