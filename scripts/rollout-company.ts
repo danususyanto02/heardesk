@@ -32,9 +32,16 @@ const tables = [
   "StorageBudget",
 ];
 const quote = (name: string) => '"' + name.replaceAll('"', '""') + '"';
-async function snapshot(pool: pg.Pool = operator) {
+async function snapshot(pool: pg.Pool = operator, includeReplies = true) {
   const result: Record<string, { count: number; hash: string }> = {};
-  for (const table of tables) {
+  const names = [...tables];
+  if (includeReplies) {
+    const exists = (await pool.query(`SELECT to_regclass('"PublicReply"') AS name`)).rows[0]?.name;
+    if (exists) {
+      names.push("PublicReply");
+    }
+  }
+  for (const table of names) {
     const rows = (
       await pool.query(`SELECT row_to_json(t)::text AS value FROM ${quote(table)} t ORDER BY id`)
     ).rows.map((row) => row.value);
@@ -147,6 +154,7 @@ try {
       path.join(directory, "manifest.json"),
       JSON.stringify(
         {
+          version: 2,
           createdAt: new Date().toISOString(),
           database: "ureport",
           before,
@@ -181,11 +189,18 @@ try {
       connectionString: "postgresql://heardesk_restore@127.0.0.1:55432/heardesk_restore",
     });
     try {
-      const actual = await snapshot(restored);
+      if (manifest.version !== undefined && manifest.version !== 2) {
+        throw new Error("Unsupported backup manifest version.");
+      }
+      const actual = await snapshot(restored, manifest.version === 2);
       if (JSON.stringify(actual) !== JSON.stringify(manifest.before)) {
         throw new Error("Restored database hashes differ from backup snapshot.");
       }
-      console.log("Restored database verified: all 8 legacy table hashes/counts match backup.");
+      console.log(
+        manifest.version === 2
+          ? "Restored database verified: all captured table hashes/counts, including public replies when present, match backup."
+          : "Restored database verified: all 8 legacy table hashes/counts match backup. Legacy manifest does not verify public replies.",
+      );
     } finally {
       await restored.end();
     }
@@ -321,6 +336,7 @@ try {
         "ReportReservation",
         "CompanyCreationRequest",
         "AuditEvent",
+        "PublicReply",
       ]) {
         await pool.query(`SELECT 1 FROM ${quote(table)} LIMIT 1`);
       }
@@ -361,14 +377,18 @@ try {
       await readFile(path.join(process.argv[3], "manifest.json"), "utf8"),
     );
     const counts = await snapshot();
-    for (const table of [
+    const preserved = [
       "account",
       "Installation",
       "Feedback",
       "Attachment",
       "InternalNote",
       "StorageBudget",
-    ]) {
+    ];
+    if (manifest.before.PublicReply) {
+      preserved.push("PublicReply");
+    }
+    for (const table of preserved) {
       if (JSON.stringify(counts[table]) !== JSON.stringify(manifest.before[table])) {
         throw new Error(`Legacy data changed: ${table}`);
       }
@@ -403,7 +423,7 @@ try {
     }
     console.log(
       JSON.stringify({
-        preservedLegacyTables: 6,
+        preservedLegacyTables: preserved.length,
         storageFiles: Object.keys(stored).length,
         sitesOwned: site.length,
         companyCount: Number(

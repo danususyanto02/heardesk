@@ -21,6 +21,7 @@ export async function companyDatabase() {
       "202610050002_singletons",
       "202610050003_companies",
       "202610080004_user_status",
+      "202610100005_feedback_tracking",
     ]) {
       await client.query(
         await readFile(path.resolve("prisma/migrations", migration, "migration.sql"), "utf8"),

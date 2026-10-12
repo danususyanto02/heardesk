@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon, PaperclipIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { typeLabels, statusLabels, statuses } from "@/lib/validation";
 import { DetailSkeleton } from "./skeleton";
+import { PublicReplies } from "./public-replies";
 type Note = { id: string; body: string; createdAt: string };
 type Report = {
   id: string;
@@ -16,8 +17,13 @@ type Report = {
   createdAt: string;
   attachment: { id: string; filename: string } | null;
   notes: Note[];
+  replies?: Note[];
+  trackingEnabled?: boolean;
+  canReply?: boolean;
 };
 export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
+  const currentId = useRef(id);
+  currentId.current = id;
   const [item, setItem] = useState<Report | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -29,6 +35,10 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setItem(null);
+    setSaving(false);
+    setNoteBusy(false);
+    setStatusText("");
     setError("");
     api<Report>("/api/admin/feedback/" + id)
       .then((value) => {
@@ -64,15 +74,23 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
     setError("");
     try {
       await api("/api/admin/feedback/" + id, { method: "PATCH", body: JSON.stringify({ status }) });
+      if (currentId.current !== id) {
+        return;
+      }
       setItem((current) => (current ? { ...current, status } : current));
       setStatusText("Status tersimpan.");
     } catch (error) {
+      if (currentId.current !== id) {
+        return;
+      }
       setStatusText("");
       setError(
         (error as Error).message + " Status belum diubah. Pilih kembali untuk mencoba lagi.",
       );
     } finally {
-      setSaving(false);
+      if (currentId.current === id) {
+        setSaving(false);
+      }
     }
   }
   async function addNote(event: React.SubmitEvent<HTMLFormElement>) {
@@ -87,12 +105,20 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
         method: "POST",
         body: JSON.stringify({ body: draft }),
       });
+      if (currentId.current !== id) {
+        return;
+      }
       setItem((current) => (current ? { ...current, notes: [...current.notes, note] } : current));
       changeDraft("");
     } catch (error) {
+      if (currentId.current !== id) {
+        return;
+      }
       setError((error as Error).message);
     } finally {
-      setNoteBusy(false);
+      if (currentId.current === id) {
+        setNoteBusy(false);
+      }
     }
   }
   return (
@@ -112,7 +138,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
           </button>
         </section>
       )}
-      {!loading && item && (
+      {!loading && item && item.id === id && (
         <article className="detail-panel">
           <header className="detail-top">
             <div>
@@ -178,6 +204,13 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
               <dd>{item.email ?? "Tidak disertakan"}</dd>
             </dl>
           </details>
+          <PublicReplies
+            key={id}
+            id={id}
+            initial={item.replies ?? []}
+            enabled={item.trackingEnabled === true}
+            canReply={item.canReply !== false}
+          />
           <section className="notes">
             <h2>Catatan internal</h2>
             {item.notes.length ? (

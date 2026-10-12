@@ -172,6 +172,9 @@ it("configures approved allowances, audit reason, and runtime verification toget
 
 it("backs up empty storage with readable archive and matching legacy snapshots", async () => {
   vi.stubEnv("POSTGRES_BIN", "sandbox-tools");
+  sandbox.query.mockImplementation(async (sql: string) => ({
+    rows: sql.includes("to_regclass") ? [{ name: "PublicReply" }] : [],
+  }));
   await run("backup");
   const manifestEntry = [...sandbox.writes.entries()].find(([file]) =>
     file.endsWith("manifest.json"),
@@ -179,6 +182,8 @@ it("backs up empty storage with readable archive and matching legacy snapshots",
   const manifest = JSON.parse(manifestEntry[1]);
   expect(manifest.storage).toEqual({});
   expect(manifest.database).toBe("ureport");
+  expect(manifest.version).toBe(2);
+  expect(manifest.before.PublicReply).toMatchObject({ count: 0 });
   expect(manifest.dumpHash).toBe(createHash("sha256").update("archive").digest("hex"));
 });
 

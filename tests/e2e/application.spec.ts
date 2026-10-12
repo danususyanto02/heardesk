@@ -47,7 +47,7 @@ test("setup, private admin, anonymous widget, attachments and logout", async ({
   expect((await request.get("/api/admin/feedback")).status()).toBe(401);
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: /Website feedback,\s*in one place\./ }),
+    page.getByRole("heading", { level: 1, name: /Website feedback\.\s*Ready for your team\./ }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Set up HearDesk", exact: true }).first(),

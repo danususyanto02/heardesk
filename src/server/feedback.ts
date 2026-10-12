@@ -10,6 +10,7 @@ import { boundedBytes, HttpError } from "./http";
 import { stageAttachment, discardAttachment } from "./storage";
 import { clientKey, rateLimit } from "./rate-limit";
 import { submitVisitorFeedback } from "@/modules/feedback/application/submit-visitor-feedback";
+import { trackingHash } from "@/modules/feedback/infrastructure/tracking-code";
 export async function submitFeedback(request: Request) {
   await rateLimit("submit:" + clientKey(request), 5);
   await rateLimit("submit:global", 100);
@@ -27,7 +28,16 @@ export async function submitFeedback(request: Request) {
   } catch {
     throw new HttpError(400, "Formulir tidak valid.");
   }
-  const allowed = ["siteKey", "submissionId", "type", "message", "email", "pageUrl", "screenshot"];
+  const allowed = [
+    "siteKey",
+    "submissionId",
+    "type",
+    "message",
+    "email",
+    "pageUrl",
+    "screenshot",
+    "trackingCode",
+  ];
   for (const key of form.keys()) {
     if (!allowed.includes(key) || form.getAll(key).length !== 1) {
       throw new HttpError(400, "Field formulir tidak valid.");
@@ -38,6 +48,11 @@ export async function submitFeedback(request: Request) {
       allowed.filter((key) => key !== "screenshot").map((key) => [key, form.get(key) ?? undefined]),
     ),
   );
+  const code = form.get("trackingCode");
+  if (code !== null && typeof code !== "string") {
+    throw new HttpError(400, "Kode pelacakan tidak valid.");
+  }
+  const codeHash = code === null ? undefined : trackingHash(code);
   const site = await db.site.findFirst({
     where: { publicKey: data.siteKey, company: { profile: { status: "ACTIVE" } } },
   });
@@ -58,7 +73,7 @@ export async function submitFeedback(request: Request) {
           .digest("hex")
       : null;
   const fingerprint = createHash("sha256")
-    .update(JSON.stringify({ ...data, imageHash }))
+    .update(JSON.stringify({ ...data, imageHash, ...(codeHash ? { trackingHash: codeHash } : {}) }))
     .digest("hex");
   const input = {
     siteKey: data.siteKey,
@@ -69,7 +84,7 @@ export async function submitFeedback(request: Request) {
     email: data.email ?? undefined,
     pageUrl: data.pageUrl ?? undefined,
   };
-  return submitVisitorFeedback(
+  const result = await submitVisitorFeedback(
     input,
     file instanceof File && file.size ? new Uint8Array(await file.arrayBuffer()) : null,
     {
@@ -98,6 +113,7 @@ export async function submitFeedback(request: Request) {
             siteId: reservation.siteId,
             submissionId: value.submissionId,
             fingerprint: value.fingerprint,
+            trackingHash: codeHash,
             type: value.type,
             message: value.message,
             email: value.email,
@@ -109,4 +125,5 @@ export async function submitFeedback(request: Request) {
       release: (companyId, reservation) => releaseVisitorReservation(db, companyId, reservation.id),
     },
   );
+  return code === null ? result : { ...result, trackingCode: code };
 }

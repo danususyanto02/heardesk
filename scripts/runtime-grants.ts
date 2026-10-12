@@ -18,6 +18,7 @@ export async function provisionRuntimeGrants(
     "ReportUsagePeriod",
     "ReportReservation",
     "CompanyCreationRequest",
+    "PublicReply",
   ]) {
     await client.query(
       `GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE ${prefix}${quote(table)} TO ${role}`,

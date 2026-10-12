@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { XIcon, PaperclipIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { cleanPageUrl, types, typeLabels } from "@/lib/validation";
+import { createTrackingCode, trackingLink } from "@/lib/tracking";
 export function FeedbackForm({
   siteKey,
   name,
@@ -28,11 +29,15 @@ export function FeedbackForm({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const submission = useRef("");
+  const tracking = useRef("");
+  const [receipt, setReceipt] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const emailSection = useRef<HTMLDetailsElement>(null);
   const messageInput = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     submission.current = crypto.randomUUID();
+    tracking.current = createTrackingCode();
     if (!parentOrigin || window.parent === window) {
       return;
     }
@@ -79,6 +84,7 @@ export function FeedbackForm({
   function changed() {
     if (!busy) {
       submission.current = crypto.randomUUID();
+      tracking.current = createTrackingCode();
     }
   }
   function selectFile(value?: File) {
@@ -128,6 +134,7 @@ export function FeedbackForm({
       Object.entries({
         siteKey,
         submissionId: submission.current,
+        trackingCode: tracking.current,
         type,
         message,
         email,
@@ -136,7 +143,13 @@ export function FeedbackForm({
       if (file) {
         data.set("screenshot", file);
       }
-      await api("/api/feedback", { method: "POST", body: data, credentials: "omit" });
+      const result = await api<{ trackingCode?: string }>("/api/feedback", {
+        method: "POST",
+        body: data,
+        credentials: "omit",
+      });
+      setReceipt(result.trackingCode ?? "");
+      setCopyMessage("");
       setSuccess(true);
     } catch (error) {
       setError((error as Error).message);
@@ -147,6 +160,14 @@ export function FeedbackForm({
   function close() {
     if (parentOrigin && window.parent !== window) {
       window.parent.postMessage({ type: "ureport:close" }, parentOrigin);
+    }
+  }
+  async function copyReceipt(value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopyMessage("Tersalin. Simpan di tempat pribadi.");
+    } catch {
+      setCopyMessage("Tidak bisa menyalin otomatis. Pilih dan salin kode secara manual.");
     }
   }
   return (
@@ -177,6 +198,42 @@ export function FeedbackForm({
           <p className="muted">
             Terima kasih. Masukan Anda tersimpan untuk ditinjau admin website.
           </p>
+          {receipt && (
+            <div className="tracking-receipt">
+              <p>Simpan kode atau link ini untuk melihat status dan balasan tim tanpa login.</p>
+              <label>
+                Kode pelacakan
+                <input readOnly value={receipt} onFocus={(event) => event.target.select()} />
+              </label>
+              <a
+                className="btn primary"
+                href={trackingLink(receipt)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Lihat status &amp; balasan
+              </a>
+              <div className="receipt-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => void copyReceipt(trackingLink(receipt))}
+                >
+                  Salin link
+                </button>
+                <button type="button" className="btn" onClick={() => void copyReceipt(receipt)}>
+                  Salin kode
+                </button>
+              </div>
+              <output className="helper" aria-live="polite">
+                {copyMessage}
+              </output>
+              <p className="helper">
+                Siapa pun yang memiliki kode dapat membaca laporan dan balasan publiknya. Jangan
+                bagikan kode ini.
+              </p>
+            </div>
+          )}
           <button
             type="button"
             className="btn"
@@ -185,6 +242,7 @@ export function FeedbackForm({
               setMessage("");
               setEmail("");
               setFile(null);
+              setReceipt("");
               changed();
             }}
           >
@@ -289,7 +347,10 @@ export function FeedbackForm({
             </p>
             <p className="helper">Query dan fragment tidak disertakan.</p>
           </details>
-          <p className="helper">Feedback hanya dapat dibaca admin website.</p>
+          <p className="helper">
+            Tim website meninjau feedback Anda. Setelah mengirim, simpan kode pelacakan untuk
+            membaca status dan balasan publik tim.
+          </p>
           {preview && <p className="helper">Preview formulir, tidak mengirim data.</p>}
           {error && (
             <p className="error" role="alert">
@@ -301,6 +362,9 @@ export function FeedbackForm({
           </button>
         </form>
       )}
+      <a className="widget-track-link" href="/track" target="_blank" rel="noopener noreferrer">
+        Sudah punya kode? Lacak feedback
+      </a>
     </section>
   );
 }

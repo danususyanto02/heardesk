@@ -62,6 +62,7 @@ export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackReposi
         where: { id, site: { companyId: scope.companyId } },
         include: {
           attachment: true,
+          publicReplies: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
           notes: {
             orderBy: { createdAt: "asc" },
             include: { author: { select: { id: true, name: true } } },
@@ -73,6 +74,13 @@ export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackReposi
             ...item(row),
             email: row.email,
             pageUrl: row.pageUrl,
+            trackingEnabled: row.trackingHash !== null,
+            canReply: scope.role !== "VIEWER",
+            replies: row.publicReplies.map((reply) => ({
+              id: reply.id,
+              body: reply.body,
+              createdAt: reply.createdAt.toISOString(),
+            })),
             attachment: row.attachment
               ? {
                   id: row.attachment.id,
@@ -116,6 +124,27 @@ export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackReposi
         author: row.author,
         createdAt: row.createdAt.toISOString(),
       };
+    },
+    async addReply(scope, id, body, requestId) {
+      const report = await tx.feedback.findFirst({
+        where: { id, site: { companyId: scope.companyId } },
+        select: { trackingHash: true },
+      });
+      if (!report || !report.trackingHash) {
+        return null;
+      }
+      const existing = await tx.publicReply.findUnique({
+        where: { feedbackId_requestId: { feedbackId: id, requestId } },
+      });
+      if (existing && existing.body !== body) {
+        throw Object.assign(new Error("Reply conflict"), { code: "SUBMISSION_CONFLICT" });
+      }
+      const row =
+        existing ??
+        (await tx.publicReply.create({
+          data: { feedbackId: id, authorId: scope.actorId, body, requestId },
+        }));
+      return { id: row.id, body: row.body, createdAt: row.createdAt.toISOString() };
     },
     async attachment(scope, id) {
       const row = await tx.attachment.findFirst({
