@@ -33,6 +33,7 @@ export type NoteDto = Readonly<{
   author: Readonly<{ id: string; name: string }>;
   createdAt: string;
 }>;
+export type PublicReplyDto = Readonly<{ id: string; body: string; createdAt: string }>;
 export type AttachmentMetadata = Readonly<{
   id: string;
   filename: string;
@@ -44,6 +45,9 @@ export type FeedbackDetail = FeedbackItem &
     email: string | null;
     pageUrl: string | null;
     notes: readonly NoteDto[];
+    replies: readonly PublicReplyDto[];
+    trackingEnabled: boolean;
+    canReply: boolean;
     attachment: AttachmentMetadata | null;
   }>;
 export type StatusResult = Readonly<{ id: string; status: FeedbackStatus }>;
@@ -63,5 +67,11 @@ export interface FeedbackRepository {
     status: FeedbackStatus,
   ): Promise<StatusResult | null>;
   addNote(scope: AuthorizedCompany, id: string, body: string): Promise<NoteDto | null>;
+  addReply(
+    scope: AuthorizedCompany,
+    id: string,
+    body: string,
+    requestId: string,
+  ): Promise<PublicReplyDto | null>;
   attachment(scope: AuthorizedCompany, id: string): Promise<PrivateAttachment | null>;
 }

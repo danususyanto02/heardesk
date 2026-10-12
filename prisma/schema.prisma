@@ -37,6 +37,7 @@ model User {
   sessions Session[]
   accounts Account[]
   notes InternalNote[]
+  publicReplies PublicReply[]
   installation Installation?
   memberships Member[]
   invitations Invitation[]
@@ -121,6 +122,7 @@ model Feedback {
   site Site @relation(fields: [siteId], references: [id])
   submissionId String
   fingerprint String
+  trackingHash String? @unique
   type FeedbackType
   message String
   email String?
@@ -130,6 +132,7 @@ model Feedback {
   updatedAt DateTime @updatedAt
   attachment Attachment?
   notes InternalNote[]
+  publicReplies PublicReply[]
   @@unique([siteId, submissionId])
   @@index([siteId, createdAt, id])
   @@index([status, type])
@@ -153,6 +156,18 @@ model InternalNote {
   body String
   createdAt DateTime @default(now())
   @@index([feedbackId, createdAt])
+}
+model PublicReply {
+  id String @id @default(cuid())
+  feedbackId String
+  feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  authorId String
+  author User @relation(fields: [authorId], references: [id])
+  requestId String
+  body String
+  createdAt DateTime @default(now())
+  @@unique([feedbackId, requestId])
+  @@index([feedbackId, createdAt, id])
 }
 model RateBucket {
   key String @id

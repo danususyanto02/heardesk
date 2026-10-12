@@ -86,6 +86,7 @@ export type VisitorReport = Readonly<{
   siteId: number;
   submissionId: string;
   fingerprint: string;
+  trackingHash?: string;
   type: FeedbackType;
   message: string;
   email?: string;

@@ -1,4 +1,60 @@
 @import "tailwindcss";
+.tracking-page {
+  max-width: 780px;
+}
+.tracking-page > p {
+  margin: 16px 0;
+}
+.tracking-page > .form-stack {
+  margin: 28px 0 16px;
+}
+.tracking-report {
+  margin-top: 32px;
+  border-top: 1px solid var(--line);
+  padding-top: 28px;
+}
+.tracking-report > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.tracking-report .report-message,
+.note p {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.tracking-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  margin: 20px 0;
+}
+.tracking-receipt label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.receipt-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.receipt-actions button {
+  flex: 1;
+}
+.widget-track-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
 .websites-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.85fr) minmax(300px, 1fr);

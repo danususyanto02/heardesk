@@ -29,6 +29,10 @@ export function companyFeedback(uow: CompanyUnitOfWork<{ feedback: FeedbackRepos
       uow.write(actor, companyId, "feedback:note", async (scope, tx) =>
         found(await tx.feedback.addNote(scope, id, body)),
       ),
+    addReply: (actor: Actor, companyId: string, id: string, body: string, requestId: string) =>
+      uow.write(actor, companyId, "feedback:note", async (scope, tx) =>
+        found(await tx.feedback.addReply(scope, id, body, requestId)),
+      ),
     attachment: (actor: Actor, companyId: string, id: string) =>
       uow.read(actor, companyId, "feedback:read", async (scope, tx) =>
         found(await tx.feedback.attachment(scope, id)),

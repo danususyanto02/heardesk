@@ -44,7 +44,10 @@ it("retries unchanged submissions with the same idempotency key and omits creden
     submissions.push(options.body as FormData);
     return submissions.length === 1
       ? Response.json({ error: { message: "Try again" } }, { status: 503 })
-      : Response.json({ duplicate: false });
+      : Response.json({
+          duplicate: false,
+          trackingCode: (options.body as FormData).get("trackingCode"),
+        });
   });
   render(<FeedbackForm siteKey="key" name="Shop" />);
   fillMessage();
@@ -53,6 +56,10 @@ it("retries unchanged submissions with the same idempotency key and omits creden
   send();
   await screen.findByRole("heading", { name: "Feedback sudah diterima" });
   expect(submissions[0].get("submissionId")).toBe(submissions[1].get("submissionId"));
+  expect(submissions[0].get("trackingCode")).toBe(submissions[1].get("trackingCode"));
+  expect(
+    screen.getByRole("link", { name: "Lihat status & balasan" }).getAttribute("href"),
+  ).toContain("/track#code=" + submissions[1].get("trackingCode"));
   expect(submissions[0].get("siteKey")).toBe("key");
   fireEvent.click(screen.getByRole("button", { name: "Kirim masukan lain" }));
   expect((screen.getByLabelText(/Pesan/) as HTMLTextAreaElement).value).toBe("");
@@ -60,6 +67,7 @@ it("retries unchanged submissions with the same idempotency key and omits creden
   send();
   await screen.findByRole("heading", { name: "Feedback sudah diterima" });
   expect(submissions[2].get("submissionId")).not.toBe(submissions[1].get("submissionId"));
+  expect(submissions[2].get("trackingCode")).not.toBe(submissions[1].get("trackingCode"));
 });
 
 it("changes submission identity after edits and sends selected feedback type and screenshot", async () => {

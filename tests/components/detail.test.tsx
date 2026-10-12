@@ -23,6 +23,20 @@ const report = {
   notes: [],
 };
 
+it("never renders prior report reply controls after next report fails to load", async () => {
+  vi.stubGlobal("fetch", async (path: string) =>
+    path.endsWith("r1")
+      ? Response.json({ ...report, trackingEnabled: true })
+      : Response.json({ error: { message: "Unavailable" } }, { status: 503 }),
+  );
+  const view = render(<Detail id="r1" back="/inbox" />);
+  await screen.findByLabelText("Balasan publik");
+  view.rerender(<Detail id="r2" back="/inbox" />);
+  await screen.findByRole("alert");
+  expect(screen.queryByText("Broken checkout")).toBeNull();
+  expect(screen.queryByLabelText("Balasan publik")).toBeNull();
+});
+
 it("renders absent context and restores a report-specific note draft", async () => {
   sessionStorage.setItem("note-draft:r1", "Follow up tomorrow");
   vi.stubGlobal("fetch", async () => Response.json(report));
