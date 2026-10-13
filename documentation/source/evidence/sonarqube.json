@@ -1,0 +1,40 @@
+{
+  "projectName": "heardesk",
+  "branch": "master",
+  "analysisDate": "2026-10-13T03:37:04+00:00",
+  "retrievalDate": "2026-10-13",
+  "source": "SonarQube MCP: list_branches, get_project_quality_gate_status, get_component_measures, search_sonar_issues_in_projects",
+  "analysisRevision": null,
+  "qualityGate": "OK",
+  "newCoverage": 80.4,
+  "overallCoverage": 80.6,
+  "newDuplicatedLinesDensity": 0.0,
+  "newIssues": 0,
+  "openIssues": 0,
+  "bugs": 0,
+  "vulnerabilities": 0,
+  "securityHotspots": 0,
+  "history": [
+    {
+      "analysisDate": "2026-10-12T11:43:09Z",
+      "qualityGate": "ERROR",
+      "newCoverage": 80.0,
+      "newIssues": 9,
+      "newDuplication": 0.0
+    },
+    {
+      "analysisDate": "2026-10-13T03:16:22Z",
+      "qualityGate": "ERROR",
+      "newCoverage": 79.9,
+      "newIssues": 1,
+      "newDuplication": 0.0
+    },
+    {
+      "analysisDate": "2026-10-13T03:37:04Z",
+      "qualityGate": "OK",
+      "newCoverage": 80.4,
+      "newIssues": 0,
+      "newDuplication": 0.0
+    }
+  ]
+}

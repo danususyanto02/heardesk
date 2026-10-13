@@ -45,6 +45,8 @@ Di menu Website, salin kode pemasangan aktual dan tempel sebelum `</body>` websi
 
 Demo pada landing memakai `DemoForm` terpisah dari form widget production. Upload preview demo adalah object URL lokal yang dilepas saat dialog ditutup; submit hanya menampilkan hasil simulasi, tanpa menyimpan pesan/email/file ke server. Screenshot landing berasal dari aplikasi pada database test dan diberi label data pengujian, bukan laporan pengunjung nyata.
 
+For optional public portfolio login credentials, see [Portfolio demo accounts](docs/portfolio-demo-accounts.md). Use dedicated demo identities, never your installation administrator's credentials. Public Platform Owner access is only appropriate for a demo-only installation.
+
 ## Production
 
 ### Menguji integration-test.html lokal

@@ -1,19 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import type { PublicDemoAccess } from "@/modules/identity/domain/demo-accounts";
 export function AuthForm({
   setup = false,
   signupEnabled = false,
+  demoAccess = null,
 }: Readonly<{
   setup?: boolean;
   signupEnabled?: boolean;
+  demoAccess?: PublicDemoAccess | null;
 }>) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [visible, setVisible] = useState(false);
   const [created, setCreated] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [demoSelection, setDemoSelection] = useState("");
+  const emailInput = useRef<HTMLInputElement>(null);
   const submitLabel = setup ? "Buat akun" : "Sign in";
   async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,7 +112,16 @@ export function AuthForm({
           )}
           <label>
             {setup ? "Email admin" : "Email"}
-            <input name="email" type="email" required maxLength={254} autoComplete="username" />
+            <input
+              ref={emailInput}
+              name="email"
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="username"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
           </label>
           <div>
             <label htmlFor="password">Password</label>
@@ -118,6 +134,8 @@ export function AuthForm({
                 minLength={setup ? 15 : undefined}
                 maxLength={128}
                 autoComplete={setup ? "new-password" : "current-password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 aria-describedby={setup ? "password-help" : undefined}
               />
               <button
@@ -160,6 +178,55 @@ export function AuthForm({
             ? "Anda langsung masuk setelah akun dibuat. Kode aktivasi instalasi tidak diberikan kepada pengunjung."
             : "Visitors do not need accounts to send feedback."}
         </p>
+        {!setup && demoAccess && (
+          <section className="auth-demo" aria-labelledby="demo-accounts-title">
+            <header>
+              <h2 id="demo-accounts-title">Demo accounts</h2>
+              <p className="helper">Choose a role to fill the form, then select Sign in.</p>
+            </header>
+            <p className="auth-demo-notice">
+              These accounts are shared with other visitors. Changes are visible to everyone using
+              the demo. Do not enter personal or confidential information.
+            </p>
+            <p className="auth-demo-password">
+              <span>Password for all demo accounts</span>
+              <code>{demoAccess.password}</code>
+            </p>
+            <ul className="auth-demo-list">
+              {demoAccess.accounts.map((account) => (
+                <li key={account.id}>
+                  <div>
+                    <h3 id={account.id + "-label"}>{account.label}</h3>
+                    <p className="helper">{account.description}</p>
+                    <p className="auth-demo-email">
+                      <span className="sr-only">Email: </span>
+                      {account.email}
+                    </p>
+                  </div>
+                  <button
+                    className="btn"
+                    type="button"
+                    disabled={busy}
+                    aria-labelledby={account.id + "-use " + account.id + "-label"}
+                    onClick={() => {
+                      setEmail(account.email);
+                      setPassword(demoAccess.password);
+                      setVisible(false);
+                      setError("");
+                      setDemoSelection(account.label + " credentials filled. Select Sign in.");
+                      emailInput.current?.focus();
+                    }}
+                  >
+                    <span id={account.id + "-use"}>Use account</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="helper" role="status">
+              {demoSelection}
+            </p>
+          </section>
+        )}
       </section>
     </div>
   );

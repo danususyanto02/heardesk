@@ -2378,6 +2378,68 @@ tbody tr:hover {
 .auth-panel h1 {
   font-size: 26px;
 }
+.auth-demo {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.auth-demo header > p {
+  margin-top: 6px;
+}
+.auth-demo-notice {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.auth-demo-password {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+.auth-demo-password code {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 15px;
+  user-select: all;
+}
+.auth-demo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.auth-demo-list li {
+  display: grid;
+  gap: 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.auth-demo-list li > div {
+  min-width: 0;
+}
+.auth-demo-list h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.auth-demo-email {
+  margin-top: 8px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.auth-demo-list .btn {
+  justify-self: start;
+}
+.auth-demo > [role="status"]:empty {
+  display: none;
+}
+@media (min-width: 480px) {
+  .auth-demo-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+  }
+}
 .form-stack {
   display: flex;
   flex-direction: column;
