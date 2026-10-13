@@ -202,7 +202,7 @@ export function FeedbackForm({
             <div className="tracking-receipt">
               <p>Simpan kode atau link ini untuk melihat status dan balasan tim tanpa login.</p>
               <label>
-                Kode pelacakan
+                <span>Kode pelacakan</span>
                 <input readOnly value={receipt} onFocus={(event) => event.target.select()} />
               </label>
               <a

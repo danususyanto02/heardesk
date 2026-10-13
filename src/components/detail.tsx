@@ -138,7 +138,7 @@ export function Detail({ id, back }: Readonly<{ id: string; back: string }>) {
           </button>
         </section>
       )}
-      {!loading && item && item.id === id && (
+      {!loading && item?.id === id && (
         <article className="detail-panel">
           <header className="detail-top">
             <div>

@@ -6,7 +6,8 @@ import {
 } from "@/modules/usage/infrastructure/prisma-visitor-usage";
 import { feedbackInput } from "@/lib/validation";
 import { db } from "./db";
-import { boundedBytes, HttpError } from "./http";
+import { HttpError } from "./http";
+import { feedbackFormFields, readFeedbackForm } from "./feedback-form-request";
 import { stageAttachment, discardAttachment } from "./storage";
 import { clientKey, rateLimit } from "./rate-limit";
 import { submitVisitorFeedback } from "@/modules/feedback/application/submit-visitor-feedback";
@@ -14,38 +15,12 @@ import { trackingHash } from "@/modules/feedback/infrastructure/tracking-code";
 export async function submitFeedback(request: Request) {
   await rateLimit("submit:" + clientKey(request), 5);
   await rateLimit("submit:global", 100);
-  if (!request.headers.get("content-type")?.startsWith("multipart/form-data;")) {
-    throw new HttpError(415, "Gunakan formulir feedback.");
-  }
-  const bytes = await boundedBytes(request, 6 * 1024 * 1024);
-  let form: FormData;
-  try {
-    form = await new Request(request.url, {
-      method: "POST",
-      headers: { "content-type": request.headers.get("content-type")! },
-      body: bytes,
-    }).formData();
-  } catch {
-    throw new HttpError(400, "Formulir tidak valid.");
-  }
-  const allowed = [
-    "siteKey",
-    "submissionId",
-    "type",
-    "message",
-    "email",
-    "pageUrl",
-    "screenshot",
-    "trackingCode",
-  ];
-  for (const key of form.keys()) {
-    if (!allowed.includes(key) || form.getAll(key).length !== 1) {
-      throw new HttpError(400, "Field formulir tidak valid.");
-    }
-  }
+  const form = await readFeedbackForm(request);
   const data = feedbackInput.parse(
     Object.fromEntries(
-      allowed.filter((key) => key !== "screenshot").map((key) => [key, form.get(key) ?? undefined]),
+      feedbackFormFields
+        .filter((key) => key !== "screenshot")
+        .map((key) => [key, form.get(key) ?? undefined]),
     ),
   );
   const code = form.get("trackingCode");
