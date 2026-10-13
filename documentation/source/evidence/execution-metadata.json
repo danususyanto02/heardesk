@@ -1,0 +1,11 @@
+{
+  "sourceBaseline": "afb4f54a83eafcd0f10232adbbeeae92292c293a",
+  "startTime": "2026-10-13T04:14:49.928Z",
+  "buildDirectory": ".next-sonar",
+  "production": true,
+  "command": "npm run test:e2e -- --reporter=json",
+  "buildExitCode": 0,
+  "testExitCode": 0,
+  "browser": "Chrome headless, Playwright 1.63.0",
+  "metadataOrigin": "Recorded execution command, successful build and complete Playwright JSON stats; source baseline inspected before run. Update this receipt explicitly for subsequent executions."
+}

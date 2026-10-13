@@ -21,6 +21,7 @@
     "test:coverage:all": "npm run test:coverage && npm run test:integration -- --coverage",
     "test:integration": "tsx scripts/test-integration.ts",
     "db:seed:demo": "tsx scripts/seed-demo.ts",
+    "db:demo:accounts": "tsx scripts/provision-portfolio-demo.ts",
     "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:migrate": "tsx scripts/migrate.ts",

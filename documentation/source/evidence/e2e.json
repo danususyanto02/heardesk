@@ -1,0 +1,178 @@
+{
+  "sourceBaseline": "afb4f54a83eafcd0f10232adbbeeae92292c293a",
+  "source": "Fresh Playwright production JSON report with explicit execution metadata",
+  "execution": {
+    "sourceBaseline": "afb4f54a83eafcd0f10232adbbeeae92292c293a",
+    "startTime": "2026-10-13T04:14:49.928Z",
+    "buildDirectory": ".next-sonar",
+    "production": true,
+    "command": "npm run test:e2e -- --reporter=json",
+    "buildExitCode": 0,
+    "testExitCode": 0,
+    "browser": "Chrome headless, Playwright 1.63.0",
+    "metadataOrigin": "Recorded execution command, successful build and complete Playwright JSON stats; source baseline inspected before run. Update this receipt explicitly for subsequent executions."
+  },
+  "stats": {
+    "startTime": "2026-10-13T04:14:49.928Z",
+    "duration": 113006.269,
+    "expected": 19,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "scenarios": [
+    {
+      "title": "successful setup with failed auto-login does not ask to create account again",
+      "file": "application.spec.ts",
+      "line": 6,
+      "status": "passed",
+      "durationMs": 683,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "setup, private admin, anonymous widget, attachments and logout",
+      "file": "application.spec.ts",
+      "line": 40,
+      "status": "passed",
+      "durationMs": 11731,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "anonymous retries, conflicting payloads, invalid files and request limits",
+      "file": "application.spec.ts",
+      "line": 194,
+      "status": "passed",
+      "durationMs": 2342,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "landing motion settles after rapid interaction and respects reduced motion",
+      "file": "landing.spec.ts",
+      "line": 4,
+      "status": "passed",
+      "durationMs": 1908,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "completed entrances remain settled across resizing and preference changes",
+      "file": "landing.spec.ts",
+      "line": 52,
+      "status": "passed",
+      "durationMs": 2340,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "widget illustration contents fit at intermediate widths",
+      "file": "landing.spec.ts",
+      "line": 94,
+      "status": "passed",
+      "durationMs": 382,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "public landing demo never writes feedback and works on mobile",
+      "file": "landing.spec.ts",
+      "line": 111,
+      "status": "passed",
+      "durationMs": 2725,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "website list and add form align side-by-side on desktop and stack on mobile",
+      "file": "visual.spec.ts",
+      "line": 6,
+      "status": "passed",
+      "durationMs": 1531,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "desktop and mobile workspace render without overflow",
+      "file": "visual.spec.ts",
+      "line": 28,
+      "status": "passed",
+      "durationMs": 2569,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "search, filters, settings persistence and public widget configuration",
+      "file": "visual.spec.ts",
+      "line": 62,
+      "status": "passed",
+      "durationMs": 10474,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "widget key rotation requires confirmation and retires old key without deleting reports",
+      "file": "visual.spec.ts",
+      "line": 145,
+      "status": "passed",
+      "durationMs": 5077,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "Company API and legacy routes reject foreign reports, notes, attachments and platform-only access",
+      "file": "zz-company-isolation.spec.ts",
+      "line": 9,
+      "status": "passed",
+      "durationMs": 5855,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "Company monthly line chart and three Excel periods match aggregate data",
+      "file": "zz-feedback-reporting.spec.ts",
+      "line": 5,
+      "status": "passed",
+      "durationMs": 5781,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "filter popover floats without shifting table and preserves URL context",
+      "file": "zz-filter-ui.spec.ts",
+      "line": 3,
+      "status": "passed",
+      "durationMs": 2718,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "platform owner has separate console, real metadata and audited Company management",
+      "file": "zz-platform.spec.ts",
+      "line": 3,
+      "status": "passed",
+      "durationMs": 16069,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "landing and login recognize current owner session and revoked cookies",
+      "file": "zz-session-navigation.spec.ts",
+      "line": 3,
+      "status": "passed",
+      "durationMs": 2891,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "data skeletons remain until response, disappear on success/error and respect reduced motion",
+      "file": "zz-skeleton.spec.ts",
+      "line": 3,
+      "status": "passed",
+      "durationMs": 7394,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "visitor tracks an anonymous report and sees public replies but never internal notes",
+      "file": "zz-tracking.spec.ts",
+      "line": 8,
+      "status": "passed",
+      "durationMs": 6158,
+      "expectedStatus": "passed"
+    },
+    {
+      "title": "local client verifies email, creates Company, connects website and resets password",
+      "file": "zzz-onboarding.spec.ts",
+      "line": 8,
+      "status": "passed",
+      "durationMs": 12462,
+      "expectedStatus": "passed"
+    }
+  ],
+  "warnings": []
+}
