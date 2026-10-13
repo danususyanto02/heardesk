@@ -31,8 +31,8 @@ export function PublicReplies({
       );
       setBody("");
       requestId.current = crypto.randomUUID();
-    } catch (problem) {
-      setError((problem as Error).message);
+    } catch (error_) {
+      setError((error_ as Error).message);
     } finally {
       setBusy(false);
     }
@@ -59,7 +59,7 @@ export function PublicReplies({
       {enabled && canReply ? (
         <form onSubmit={submit} className="form-stack">
           <label>
-            Balasan publik
+            <span>Balasan publik</span>
             <textarea
               value={body}
               disabled={busy}

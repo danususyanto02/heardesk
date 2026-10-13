@@ -130,7 +130,7 @@ export function feedbackRepository(tx: Prisma.TransactionClient): FeedbackReposi
         where: { id, site: { companyId: scope.companyId } },
         select: { trackingHash: true },
       });
-      if (!report || !report.trackingHash) {
+      if (!report?.trackingHash) {
         return null;
       }
       const existing = await tx.publicReply.findUnique({

@@ -42,9 +42,9 @@ export function FeedbackTracking() {
       if (current === sequence.current) {
         setReport(result);
       }
-    } catch (problem) {
+    } catch (error_) {
       if (current === sequence.current) {
-        setError((problem as Error).message);
+        setError((error_ as Error).message);
       }
     } finally {
       if (current === sequence.current) {
@@ -88,7 +88,7 @@ export function FeedbackTracking() {
         }}
       >
         <label>
-          Kode pelacakan
+          <span>Kode pelacakan</span>
           <input
             value={code}
             onChange={(event) => {
