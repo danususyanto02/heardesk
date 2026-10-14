@@ -1,6 +1,7 @@
 """Build styled, reproducible Word documents with embedded diagrams and evidence."""
+import argparse
 import json
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor, Cm
@@ -8,7 +9,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from PIL import Image
-from content import AUTHOR, DOCUMENTS
+from content import AUTHOR, DOCUMENTS, E2E_SCENARIO_SUMMARIES
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docx"
@@ -16,6 +17,36 @@ OUTPUT.mkdir(parents=True, exist_ok=True)
 EVIDENCE = json.loads((ROOT / "source/evidence/e2e.json").read_text(encoding="utf-8"))
 BLUE = "1463D6"
 INK = "17243B"
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--only", choices=[item[0] for item in DOCUMENTS])
+args = parser.parse_args()
+
+
+def scenario_rows(kind):
+    scenarios = EVIDENCE["scenarios"]
+    if kind == "E2E_REFERENCES":
+        return [["ID / source file", "Original automated test name"], *[
+            [f"E2E-{n:02d}\n{item['file']}:{item['line']}", item["title"]]
+            for n, item in enumerate(scenarios, 1)
+        ]]
+    recorded = {(item["file"], item["title"]) for item in scenarios}
+    if recorded != set(E2E_SCENARIO_SUMMARIES):
+        raise ValueError("Scenario descriptions must match the recorded evidence exactly")
+    return [["ID", "Scenario", "Result / duration"], *[
+        [f"E2E-{n:02d}", E2E_SCENARIO_SUMMARIES[(item["file"], item["title"])],
+         f"{item['status'].capitalize()}\n{item['durationMs']/1000:.1f} s"]
+        for n, item in enumerate(scenarios, 1)
+    ]]
+
+
+def run_summary():
+    stats = EVIDENCE["stats"]
+    started = datetime.fromisoformat(stats["startTime"].replace("Z", "+00:00"))
+    return [
+        "Run started: " + started.strftime("%d %B %Y at %H:%M:%S.") + f"{started.microsecond // 1000:03d} UTC.",
+        f"Total duration: {stats['duration']/1000:.1f} seconds.",
+    ]
 
 
 def field(paragraph, instruction):
@@ -68,11 +99,15 @@ def configure(doc, title):
     settings.append(update)
 
 
-def table(doc, rows, number, title):
+def table(doc, rows, number, title, widths=None, compact=False):
     p = doc.add_paragraph(f"Table {number}. {title}", "Caption")
     p.paragraph_format.keep_with_next = True
     t = doc.add_table(rows=1, cols=len(rows[0]))
     t.style = "Light Shading Accent 1"
+    if widths:
+        t.autofit = False
+        for column, width in zip(t.columns, widths):
+            column.width = Cm(width)
     for i, value in enumerate(rows[0]):
         t.rows[0].cells[i].text = value
     repeat = OxmlElement("w:tblHeader")
@@ -87,9 +122,12 @@ def table(doc, rows, number, title):
         props = t.rows[-1]._tr.get_or_add_trPr()
         props.append(OxmlElement("w:cantSplit"))
     for row in t.rows:
+        if widths:
+            for cell, width in zip(row.cells, widths):
+                cell.width = Cm(width)
         for cell in row.cells:
             for p in cell.paragraphs:
-                p.paragraph_format.space_after = Pt(4)
+                p.paragraph_format.space_after = Pt(2 if compact else 4)
                 p.paragraph_format.line_spacing = 1.05
                 for run in p.runs:
                     run.font.size = Pt(9)
@@ -115,6 +153,8 @@ def figure(doc, path, number, caption):
 
 
 for slug, title, subtitle, sections in DOCUMENTS:
+    if args.only and slug != args.only:
+        continue
     doc = Document()
     configure(doc, title)
     doc.add_paragraph("HearDesk", "Title")
@@ -133,20 +173,20 @@ for slug, title, subtitle, sections in DOCUMENTS:
     figures = tables = 0
     for index, item in enumerate(sections, 1):
         heading = doc.add_heading(f"{index}. {item['title']}", level=1)
-        if index > 1 and (item.get("image") or item["title"] in ["Functional requirements", "Recorded scenario results", "Data dictionary: application records"]):
+        if index > 1 and (item.get("image") or item["title"] in ["Functional requirements", "Test results", "Test source references", "Data dictionary: application records"]):
             heading.paragraph_format.page_break_before = True
         for paragraph in item["paragraphs"]:
             doc.add_paragraph(paragraph)
         rows = item.get("table")
         if rows == "E2E_RESULTS":
-            stats = EVIDENCE["stats"]
-            doc.add_paragraph(f"Recorded start (UTC): {stats['startTime']}. Duration: {stats['duration']/1000:.1f} seconds. Results: {stats['expected']} completed as expected, {stats['unexpected']} unexpected outcomes, {stats['skipped']} skipped and {stats['flaky']} flaky.")
-            rows = [["ID / file", "Executed scenario", "Result / duration"]]
-            for n, scenario in enumerate(EVIDENCE["scenarios"], 1):
-                rows.append([f"E2E-{n:02d}\n{scenario['file']}", scenario["title"], f"{scenario['status'].upper()}\n{scenario['durationMs']/1000:.1f} s"])
+            for paragraph in run_summary():
+                doc.add_paragraph(paragraph)
+        if rows in ("E2E_RESULTS", "E2E_REFERENCES"):
+            rows = scenario_rows(rows)
         if rows:
             tables += 1
-            table(doc, rows, tables, item["title"])
+            widths = {"E2E_RESULTS": (1.7, 12.0, 3.1), "E2E_REFERENCES": (5.2, 11.6)}.get(item["table"]) if isinstance(item["table"], str) else None
+            table(doc, rows, tables, item["title"], widths=widths, compact=item["table"] == "E2E_RESULTS")
         if item.get("diagram"):
             figures += 1
             figure(doc, ROOT / "diagrams/exported" / (item["diagram"] + ".png"), figures, item["title"])
@@ -158,8 +198,13 @@ for slug, title, subtitle, sections in DOCUMENTS:
     lines = ["# HearDesk: " + title, "", "Author: " + AUTHOR, ""]
     for n, item in enumerate(sections, 1):
         lines += [f"## {n}. {item['title']}", "", *item["paragraphs"], ""]
-        if isinstance(item.get("table"), list):
-            lines.extend(" | ".join(map(str, row)) for row in item["table"])
+        rows = item.get("table")
+        if rows == "E2E_RESULTS":
+            lines.extend([*run_summary(), ""])
+        if rows in ("E2E_RESULTS", "E2E_REFERENCES"):
+            rows = scenario_rows(rows)
+        if isinstance(rows, list):
+            lines.extend(" | ".join(str(value).replace("\n", "<br>") for value in row) for row in rows)
             lines.append("")
     (ROOT / "source" / (slug + ".md")).write_text("\n\n".join(lines), encoding="utf-8")
     print("Built", slug + ".docx")
