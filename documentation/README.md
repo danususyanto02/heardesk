@@ -21,6 +21,8 @@ Editorial rule: descriptions, explanations, table content and diagram labels do 
 
 Write for readers who have not seen the code. Explain Company as a team workspace, use private tracking link/code rather than private receipt, and define necessary technical terms before using them. Public reply means a team reply visible through a private tracking link, not a discussion open to everyone. Keep exact source identifiers and recorded test names where they are needed to locate evidence.
 
+The E2E report uses plain-English scenario descriptions in Section 8. Section 14 preserves the original test names, source files and line numbers under the same scenario IDs. An editorial update changes the report wording, not the recorded execution date, result or test source.
+
 Product behavior is traced to source files and tests. Results are dated and distinguish remote SonarQube metrics from local test coverage. Screenshots are illustrative test fixtures. No credentials, bearer codes, customer data, private infrastructure addresses, or environment files belong in public deliverables. Public role descriptions must not imply Platform Owner automatically reads Company feedback.
 
 Diagram direction: editorial layouts based on https://github.com/cathrynlavery/diagram-design (MIT). The static diagrams use HearDesk blue, white backgrounds, dark text, orthogonal connectors and no shadows. The ERD is split for readability. Browser exports use Source Sans 3, while Word uses Calibri for compatibility with the installed Office renderer. This is a custom implementation of the published guidance, not an installed plugin or a claim of upstream validation.
@@ -34,5 +36,7 @@ Diagram direction: editorial layouts based on https://github.com/cathrynlavery/d
 5. `python documentation/source/publish.py` copies only the four DOCX files and approved diagrams/screenshots to the portfolio.
 
 `collect_evidence.py` imports the approved run from the private local Playwright log only when it matches `source/evidence/execution-metadata.json`. For a new execution, record its exact commit, start time, build mode and exit codes first. Do not reuse the published metadata for another run. The publication script refuses missing or additional DOCX files, preventing drafts from becoming downloads accidentally.
+
+For wording changes to the E2E report only, use `python documentation/source/build_documents.py --only heardesk-end-to-end-ui-test-report`, then `python documentation/source/render_documents.py --only heardesk-end-to-end-ui-test-report`. Run the rendered-document inspection and publication steps afterward. This leaves the other three Word documents unchanged and does not run application tests.
 
 Python prerequisites: python-docx and Pillow, plus PyMuPDF for rendered-page checks and pywin32 for Word automation. Browser export uses the project's Playwright and installed Chrome. Word COM is used only when Microsoft Word is available. The source scripts do not migrate or seed application data.

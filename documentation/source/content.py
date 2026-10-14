@@ -295,6 +295,47 @@ TDD = [
     ]),
 ]
 
+E2E_SCENARIO_SUMMARIES = {
+    ("application.spec.ts", "successful setup with failed auto-login does not ask to create account again"):
+        "Account setup remains complete if automatic sign-in fails. The user is not asked to create the account again.",
+    ("application.spec.ts", "setup, private admin, anonymous widget, attachments and logout"):
+        "Users can complete setup, access the admin workspace, submit anonymous feedback with an image attachment, and sign out.",
+    ("application.spec.ts", "anonymous retries, conflicting payloads, invalid files and request limits"):
+        "Retrying an unchanged submission does not create a duplicate report. Reusing its ID with changed content, uploading an invalid image, or exceeding request limits is rejected.",
+    ("landing.spec.ts", "landing motion settles after rapid interaction and respects reduced motion"):
+        "Landing page animations finish correctly after rapid interaction and follow reduced-motion settings.",
+    ("landing.spec.ts", "completed entrances remain settled across resizing and preference changes"):
+        "Completed opening animations stay in their final position when the window is resized or motion preferences change.",
+    ("landing.spec.ts", "widget illustration contents fit at intermediate widths"):
+        "The example widget illustration on the landing page fits within its container at widths between mobile and desktop layouts.",
+    ("landing.spec.ts", "public landing demo never writes feedback and works on mobile"):
+        "The landing page demo works on mobile and does not send or save real feedback.",
+    ("visual.spec.ts", "website list and add form align side-by-side on desktop and stack on mobile"):
+        "The website list and add-website form appear side by side on desktop and stack vertically on mobile.",
+    ("visual.spec.ts", "desktop and mobile workspace render without overflow"):
+        "The workspace fits desktop and mobile screens without content overflowing the layout.",
+    ("visual.spec.ts", "search, filters, settings persistence and public widget configuration"):
+        "Search and category/status filters show matching reports or an empty state. The saved website name, button label, and button position remain after reload and appear in the visitor widget.",
+    ("visual.spec.ts", "widget key rotation requires confirmation and retires old key without deleting reports"):
+        "Replacing a widget key requires confirmation. The previous key stops working, while existing reports are retained.",
+    ("zz-company-isolation.spec.ts", "Company API and legacy routes reject foreign reports, notes, attachments and platform-only access"):
+        "Company APIs and older endpoints block access to another Company's reports, notes, and attachments. Platform-level permissions alone do not grant access.",
+    ("zz-feedback-reporting.spec.ts", "Company monthly line chart and three Excel periods match aggregate data"):
+        "The Company's monthly chart loads. Annual, monthly, and all-time Excel exports match the report totals and row counts returned for each period.",
+    ("zz-filter-ui.spec.ts", "filter popover floats without shifting table and preserves URL context"):
+        "Opening the filter panel does not move the table. Applying a filter keeps the selected page size in the URL.",
+    ("zz-platform.spec.ts", "platform owner has separate console, real metadata and audited Company management"):
+        "The Platform Owner has a separate console with activity charts, Company records, and account controls. Company suspension, reactivation, and website-limit changes work, and the saved limit change appears in the audit log.",
+    ("zz-session-navigation.spec.ts", "landing and login recognize current owner session and revoked cookies"):
+        "The landing and login pages recognize an active Platform Owner session. Reusing its cookies after sign-out does not restore access.",
+    ("zz-skeleton.spec.ts", "data skeletons remain until response, disappear on success/error and respect reduced motion"):
+        "Loading placeholders remain visible while requests are pending, disappear after success or an error, and follow reduced-motion settings.",
+    ("zz-tracking.spec.ts", "visitor tracks an anonymous report and sees public replies but never internal notes"):
+        "Visitors can track an anonymous report and read public team replies. Internal notes remain hidden.",
+    ("zzz-onboarding.spec.ts", "local client verifies email, creates Company, connects website and resets password"):
+        "A new user can verify their email through the local test mailbox, create a Company, add a website, and reset their password.",
+}
+
 E2E = [
     section("Purpose and recorded version", [
         COMMON,
@@ -346,9 +387,9 @@ E2E = [
         "Inbox tests check filters, website settings and loading placeholders. A skeleton is a temporary placeholder shown while a request is loading. The tests check that placeholders disappear when results or errors arrive.",
         "Screenshots show appearance, while assertions check behavior. Passing in this Chrome environment does not establish full compatibility with every other browser or assistive technology.",
     ]),
-    section("Recorded scenario results", [
-        "PASSED means that every assertion in that scenario succeeded during the recorded run. A skipped scenario did not run. A flaky result passes only after a failed attempt and retry. The recorded run had 19 passed scenarios, with no skipped, unexpected or flaky outcomes.",
-        "Exact test names are retained below so each row can be found in the source. Some names contain developer terms such as payload (the data sent in a request) or legacy routes (older API paths kept for compatibility). The preceding workflow table explains them in user terms.",
+    section("Test results", [
+        "All 19 scenarios passed. A scenario is marked Passed when all checks in its automated test succeed. No scenarios failed unexpectedly or were skipped, and none passed only after a retry.",
+        "Table 3 summarizes the workflows and application behavior checked during this run. Section 14 lists the original test names and source files using the same scenario IDs.",
     ], table="E2E_RESULTS"),
     section("Screenshot: landing page", [
         "Captured during the recorded browser run. The reports shown in the landing preview are examples, not customer submissions.",
@@ -368,6 +409,9 @@ E2E = [
         "Keep the test date, Git commit, browser, result file and screenshots together. When a feature changes, update its FSD requirement and test assertions before recording new results. Traces can include form data and are not automatically published.",
         "Source files: tests/e2e/application.spec.ts, landing.spec.ts, visual.spec.ts, zz-company-isolation.spec.ts, zz-feedback-reporting.spec.ts, zz-filter-ui.spec.ts, zz-platform.spec.ts, zz-skeleton.spec.ts, zz-session-navigation.spec.ts, zz-tracking.spec.ts and zzz-onboarding.spec.ts.",
     ]),
+    section("Test source references", [
+        "The original automated test names are listed here for readers who want to locate the checks in the code. The source files are in tests/e2e. Each ID matches the plain-language description in Table 3. File names and line numbers refer to the recorded source version.",
+    ], table="E2E_REFERENCES"),
 ]
 
 SONAR = [

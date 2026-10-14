@@ -124,13 +124,61 @@ Screenshots show appearance, while assertions check behavior. Passing in this Ch
 
 
 
-## 8. Recorded scenario results
+## 8. Test results
 
 
 
-PASSED means that every assertion in that scenario succeeded during the recorded run. A skipped scenario did not run. A flaky result passes only after a failed attempt and retry. The recorded run had 19 passed scenarios, with no skipped, unexpected or flaky outcomes.
+All 19 scenarios passed. A scenario is marked Passed when all checks in its automated test succeed. No scenarios failed unexpectedly or were skipped, and none passed only after a retry.
 
-Exact test names are retained below so each row can be found in the source. Some names contain developer terms such as payload (the data sent in a request) or legacy routes (older API paths kept for compatibility). The preceding workflow table explains them in user terms.
+Table 3 summarizes the workflows and application behavior checked during this run. Section 14 lists the original test names and source files using the same scenario IDs.
+
+
+
+Run started: 13 October 2026 at 04:14:49.928 UTC.
+
+Total duration: 113.0 seconds.
+
+
+
+ID | Scenario | Result / duration
+
+E2E-01 | Account setup remains complete if automatic sign-in fails. The user is not asked to create the account again. | Passed<br>0.7 s
+
+E2E-02 | Users can complete setup, access the admin workspace, submit anonymous feedback with an image attachment, and sign out. | Passed<br>11.7 s
+
+E2E-03 | Retrying an unchanged submission does not create a duplicate report. Reusing its ID with changed content, uploading an invalid image, or exceeding request limits is rejected. | Passed<br>2.3 s
+
+E2E-04 | Landing page animations finish correctly after rapid interaction and follow reduced-motion settings. | Passed<br>1.9 s
+
+E2E-05 | Completed opening animations stay in their final position when the window is resized or motion preferences change. | Passed<br>2.3 s
+
+E2E-06 | The example widget illustration on the landing page fits within its container at widths between mobile and desktop layouts. | Passed<br>0.4 s
+
+E2E-07 | The landing page demo works on mobile and does not send or save real feedback. | Passed<br>2.7 s
+
+E2E-08 | The website list and add-website form appear side by side on desktop and stack vertically on mobile. | Passed<br>1.5 s
+
+E2E-09 | The workspace fits desktop and mobile screens without content overflowing the layout. | Passed<br>2.6 s
+
+E2E-10 | Search and category/status filters show matching reports or an empty state. The saved website name, button label, and button position remain after reload and appear in the visitor widget. | Passed<br>10.5 s
+
+E2E-11 | Replacing a widget key requires confirmation. The previous key stops working, while existing reports are retained. | Passed<br>5.1 s
+
+E2E-12 | Company APIs and older endpoints block access to another Company's reports, notes, and attachments. Platform-level permissions alone do not grant access. | Passed<br>5.9 s
+
+E2E-13 | The Company's monthly chart loads. Annual, monthly, and all-time Excel exports match the report totals and row counts returned for each period. | Passed<br>5.8 s
+
+E2E-14 | Opening the filter panel does not move the table. Applying a filter keeps the selected page size in the URL. | Passed<br>2.7 s
+
+E2E-15 | The Platform Owner has a separate console with activity charts, Company records, and account controls. Company suspension, reactivation, and website-limit changes work, and the saved limit change appears in the audit log. | Passed<br>16.1 s
+
+E2E-16 | The landing and login pages recognize an active Platform Owner session. Reusing its cookies after sign-out does not restore access. | Passed<br>2.9 s
+
+E2E-17 | Loading placeholders remain visible while requests are pending, disappear after success or an error, and follow reduced-motion settings. | Passed<br>7.4 s
+
+E2E-18 | Visitors can track an anonymous report and read public team replies. Internal notes remain hidden. | Passed<br>6.2 s
+
+E2E-19 | A new user can verify their email through the local test mailbox, create a Company, add a website, and reset their password. | Passed<br>12.5 s
 
 
 
@@ -177,4 +225,54 @@ Separate recorded checks passed 269 unit/component tests and 90 integration test
 Keep the test date, Git commit, browser, result file and screenshots together. When a feature changes, update its FSD requirement and test assertions before recording new results. Traces can include form data and are not automatically published.
 
 Source files: tests/e2e/application.spec.ts, landing.spec.ts, visual.spec.ts, zz-company-isolation.spec.ts, zz-feedback-reporting.spec.ts, zz-filter-ui.spec.ts, zz-platform.spec.ts, zz-skeleton.spec.ts, zz-session-navigation.spec.ts, zz-tracking.spec.ts and zzz-onboarding.spec.ts.
+
+
+
+## 14. Test source references
+
+
+
+The original automated test names are listed here for readers who want to locate the checks in the code. The source files are in tests/e2e. Each ID matches the plain-language description in Table 3. File names and line numbers refer to the recorded source version.
+
+
+
+ID / source file | Original automated test name
+
+E2E-01<br>application.spec.ts:6 | successful setup with failed auto-login does not ask to create account again
+
+E2E-02<br>application.spec.ts:40 | setup, private admin, anonymous widget, attachments and logout
+
+E2E-03<br>application.spec.ts:194 | anonymous retries, conflicting payloads, invalid files and request limits
+
+E2E-04<br>landing.spec.ts:4 | landing motion settles after rapid interaction and respects reduced motion
+
+E2E-05<br>landing.spec.ts:52 | completed entrances remain settled across resizing and preference changes
+
+E2E-06<br>landing.spec.ts:94 | widget illustration contents fit at intermediate widths
+
+E2E-07<br>landing.spec.ts:111 | public landing demo never writes feedback and works on mobile
+
+E2E-08<br>visual.spec.ts:6 | website list and add form align side-by-side on desktop and stack on mobile
+
+E2E-09<br>visual.spec.ts:28 | desktop and mobile workspace render without overflow
+
+E2E-10<br>visual.spec.ts:62 | search, filters, settings persistence and public widget configuration
+
+E2E-11<br>visual.spec.ts:145 | widget key rotation requires confirmation and retires old key without deleting reports
+
+E2E-12<br>zz-company-isolation.spec.ts:9 | Company API and legacy routes reject foreign reports, notes, attachments and platform-only access
+
+E2E-13<br>zz-feedback-reporting.spec.ts:5 | Company monthly line chart and three Excel periods match aggregate data
+
+E2E-14<br>zz-filter-ui.spec.ts:3 | filter popover floats without shifting table and preserves URL context
+
+E2E-15<br>zz-platform.spec.ts:3 | platform owner has separate console, real metadata and audited Company management
+
+E2E-16<br>zz-session-navigation.spec.ts:3 | landing and login recognize current owner session and revoked cookies
+
+E2E-17<br>zz-skeleton.spec.ts:3 | data skeletons remain until response, disappear on success/error and respect reduced motion
+
+E2E-18<br>zz-tracking.spec.ts:8 | visitor tracks an anonymous report and sees public replies but never internal notes
+
+E2E-19<br>zzz-onboarding.spec.ts:8 | local client verifies email, creates Company, connects website and resets password
 
